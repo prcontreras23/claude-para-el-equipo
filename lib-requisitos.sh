@@ -25,12 +25,20 @@ instalar_git() {
 
   printf '\033[33m  ! Falta git. Se va a abrir una ventana de macOS para instalarlo.\033[0m\n'
   printf '\033[33m  ! Dale a "Instalar" y espera a que termine (unos minutos).\033[0m\n'
+  printf '\033[33m  ! Si la ventana da error o prefieres seguir sin git, presiona Enter aquí.\033[0m\n'
   xcode-select --install >/dev/null 2>&1
 
+  # Se espera hasta 20 minutos, pero Enter corta la espera: Apple a veces
+  # responde "no está disponible en el servidor de actualizaciones" (macOS viejo)
+  # y Claude Code funciona igual sin git.
   local i
-  for i in $(seq 1 240); do   # hasta 20 minutos
+  for i in $(seq 1 240); do
     xcode-select -p >/dev/null 2>&1 && tiene git && return 0
-    sleep 5
+    if : < /dev/tty 2>/dev/null; then
+      read -t 5 -r _ < /dev/tty && break
+    else
+      sleep 5
+    fi
   done
   ruta_extendida
   tiene git

@@ -30,7 +30,7 @@ if ! curl -fsSI --max-time 15 "https://raw.githubusercontent.com/$REPO/main/READ
 fi
 
 paso "1/4  git"
-if instalar_git; then verde "git $(git --version | awk '{print $3}')"; else rojo "No se pudo instalar git. Claude Code lo necesita para ver cambios; se sigue igual."; fi
+if instalar_git; then verde "git $(git --version | awk '{print $3}')"; else rojo "git no quedó instalado. Claude Code funciona igual; solo pierde el historial de cambios de git."; fi
 
 paso "2/4  Claude Code"
 if instalar_claude; then verde "Claude Code $(claude --version 2>/dev/null | awk '{print $1}')"; persistir_ruta
