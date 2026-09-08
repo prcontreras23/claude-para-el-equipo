@@ -1,0 +1,10 @@
+{
+  "theme": "dark",
+  "inputNeededNotifEnabled": true,
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch"
+    ]
+  }
+}
