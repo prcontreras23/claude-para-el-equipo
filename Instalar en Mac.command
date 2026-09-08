@@ -24,7 +24,8 @@ negrita "Claude para el equipo — instalación en Mac"
 gris "Perfil: ${PERFIL:-base}"
 
 [[ "$(uname -s)" == "Darwin" ]] || { rojo "Esto es para Mac."; exit 1; }
-if ! curl -fsSI --max-time 15 https://claude.ai >/dev/null 2>&1; then
+# claude.ai responde 403 a curl (protección anti-bots), así que la prueba de red va contra GitHub.
+if ! curl -fsSI --max-time 15 "https://raw.githubusercontent.com/$REPO/main/README.md" >/dev/null 2>&1; then
   rojo "No hay internet. Conéctate e inténtalo otra vez."; exit 1
 fi
 

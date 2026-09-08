@@ -23,7 +23,8 @@ Gris ("Perfil: " + $(if ($Perfil) { $Perfil } else { "base" }))
 
 # Claude Code pide Windows 10 1809 (build 17763) o mas nuevo.
 if ([Environment]::OSVersion.Version.Build -lt 17763) { Rojo "Windows muy viejo: hace falta Windows 10 1809 o mas nuevo."; exit 1 }
-try { Invoke-WebRequest -Uri "https://claude.ai" -Method Head -UseBasicParsing -TimeoutSec 15 | Out-Null }
+# claude.ai responde 403 a las peticiones de terminal; la prueba de red va contra GitHub.
+try { Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$Repo/main/README.md" -Method Head -UseBasicParsing -TimeoutSec 15 | Out-Null }
 catch { Rojo "No hay internet. Conectate e intentalo otra vez."; exit 1 }
 
 Paso "1/4  git"
