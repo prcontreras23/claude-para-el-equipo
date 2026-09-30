@@ -7,7 +7,9 @@
 #   uv        → un Python propio con las librerías de documentos (queda primero en el PATH)
 #   npm       → docx y pptxgenjs (los usan los skills de Word y PowerPoint)
 #   Whisper   → modelo large-v3-turbo (q5_0, ~550 MB) para transcribir en español
-#   Claude    → plugin oficial document-skills de Anthropic (PDF, Word, Excel, PowerPoint)
+#   Claude    → plugins oficiales: document-skills y los de oficina (productivity,
+#               enterprise-search, operations, human-resources, finance, data,
+#               marketing, pdf-viewer)
 #
 # Homebrew es lo único que pide la contraseña de la Mac (una vez).
 
@@ -23,7 +25,7 @@ BREW_FORMULAS=(poppler:pdftotext qpdf:qpdf tesseract:tesseract pandoc:pandoc ffm
                imagemagick:magick exiftool:exiftool whisper-cpp:whisper-cli node:node yt-dlp:yt-dlp)
 PY_LIBS=(pypdf pdfplumber pymupdf pikepdf reportlab pdf2image img2pdf pytesseract
          python-docx openpyxl xlsxwriter pandas python-pptx pillow matplotlib defusedxml
-         "markitdown[all]")
+         "markitdown[all]" qrcode)
 NPM_LIBS=(docx pptxgenjs)
 
 # ------------------------------------------------------------------ Homebrew
@@ -146,15 +148,43 @@ instalar_modelo_whisper() {
   tiene_modelo_whisper
 }
 
-# ------------------------------------------------------------------ Skills oficiales de documentos
+# ------------------------------------------------------------------ Plugins y skills de oficina
 
-tiene_skills_docs() { claude plugin list 2>/dev/null | grep -q "document-skills"; }
+# Plugins oficiales de Anthropic: document-skills (PDF, Word, Excel, PowerPoint)
+# y los de trabajo de oficina de knowledge-work-plugins. Se declaran también en
+# config/settings.json, y se instalan después de aplicar la configuración, porque
+# instalar escribe en ~/.claude/settings.json.
+MARKETPLACES=(anthropics/skills anthropics/knowledge-work-plugins)
+PLUGINS=(document-skills@anthropic-agent-skills
+         productivity@knowledge-work-plugins enterprise-search@knowledge-work-plugins
+         operations@knowledge-work-plugins human-resources@knowledge-work-plugins
+         finance@knowledge-work-plugins data@knowledge-work-plugins
+         marketing@knowledge-work-plugins pdf-viewer@knowledge-work-plugins)
 
-instalar_skills_docs() {
-  tiene_skills_docs && return 0
-  claude plugin marketplace add anthropics/skills >/dev/null 2>&1
-  claude plugin install document-skills@anthropic-agent-skills >/dev/null 2>&1
-  tiene_skills_docs
+tiene_plugins() {
+  local lista p; lista="$(claude plugin list 2>/dev/null)" || return 1
+  for p in "${PLUGINS[@]}"; do [[ "$lista" == *"$p"* ]] || return 1; done
+}
+
+plugins_faltan() {
+  local lista p; lista="$(claude plugin list 2>/dev/null)"
+  for p in "${PLUGINS[@]}"; do [[ "$lista" == *"$p"* ]] || echo "${p%%@*}"; done
+}
+
+# Siempre se corre (instalar dos veces no hace daño): así, si la configuración
+# pisó settings.json, los plugins vuelven a quedar activos.
+instalar_plugins() {
+  local m p
+  for m in "${MARKETPLACES[@]}"; do claude plugin marketplace add "$m" >/dev/null 2>&1; done
+  claude plugin marketplace update >/dev/null 2>&1
+  for p in "${PLUGINS[@]}"; do claude plugin install "$p" >/dev/null 2>&1; done
+  tiene_plugins
+}
+
+# ------------------------------------------------------------------ Sesión de Claude Code
+
+sesion_claude_code_activa() {
+  claude auth status 2>/dev/null | grep -q '"loggedIn": true' || tiene_sesion_claude_code
 }
 
 # ------------------------------------------------------------------ Resumen para el diagnóstico

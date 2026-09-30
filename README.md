@@ -70,15 +70,24 @@ En Mac el doble clic en `Instalar en Mac.command` **no funciona si el archivo se
 | Skills de documentos | Plugin oficial `document-skills` de Anthropic en Claude Code | Igual |
 | Configuración | Copia `config/` a `~/.claude/` y encima el perfil, si lo hay | Igual, en `%USERPROFILE%\.claude\` |
 
-**3. Pasos que hace la persona.** El instalador no sigue hasta que cada uno quede hecho:
+**3. Plugins y conectores de Claude Code**, solos: `document-skills` y los de oficina de Anthropic (`productivity`, `enterprise-search`, `operations`, `human-resources`, `finance`, `data`, `marketing`, `pdf-viewer`), y el conector de FastTrack.
 
-| Paso | Qué hace el instalador |
+**4. Diez pasos guiados.** Los que ya están hechos se detectan o se preguntan («¿Ya lo tienes?») y se saltan:
+
+| Paso | Qué hace |
 |---|---|
-| A. Entrar en claude.ai | Abre `claude.ai/login` y espera |
-| B. Claude Desktop | Si no quedó instalada, abre `claude.ai/download` y no sigue hasta encontrarla; luego la abre para entrar |
-| C. Extensión de Chrome | Abre la extensión en la Chrome Web Store y no sigue hasta que aparece instalada; luego pide entrar en ella |
-| D. Claude en Word, Excel y PowerPoint | Por cada app de Office instalada, abre el complemento de Claude en AppSource y comprueba en la caché de Office que quedó (3 intentos) |
-| E. Claude Code | Muestra el diagnóstico final y abre `claude` para entrar con la cuenta |
+| 1. Entrar a claude.ai | Abre `claude.ai/login` |
+| 2. Conectores | Abre `claude.ai/settings/connectors` para conectar Microsoft 365 (Outlook, calendario, OneDrive, Teams), Gmail, Google Calendar, Google Drive y FastTrack |
+| 3. Perfil | Seis preguntas (nombre, cargo, oficina, tareas, programas, estilo). Guarda `~/.claude/sobre-mi.md` y copia al portapapeles el texto para el perfil de claude.ai |
+| 4. Claude Desktop | Comprueba que esté instalada, la abre y espera a que la persona entre |
+| 5. Extensión de Chrome | No sigue hasta detectarla instalada |
+| 6. App del celular | iPhone o Android, con código QR en la Terminal |
+| 7. Claude en Word, Excel y PowerPoint | Complementos de AppSource, verificados en la caché de Office |
+| 8. WhatsApp (opcional) | Aviso de privacidad y, si la persona quiere, corre [whatsapp-para-claude](https://github.com/prcontreras23/whatsapp-para-claude) |
+| 9. Segundo cerebro (opcional) | Instala Obsidian, pregunta dónde crearlo (iCloud, OneDrive, Documentos u otra carpeta) y cuatro preguntas más; arma una bóveda con el patrón *LLM Wiki* de Karpathy (`fuentes/`, `wiki/`, `CLAUDE.md` como esquema) y la registra en Obsidian |
+| 10. Claude Code | Diagnóstico final, `claude auth login` hasta que quede la sesión, y abre `claude` |
+
+**Sirve igual si la persona ya usaba Claude**: lo instalado se salta, su `CLAUDE.md` se respeta (las reglas del equipo se importan desde `~/.claude/equipo-adose.md`) y su `settings.json` no se toca.
 
 En Mac, **Homebrew pide una vez la contraseña de la computadora**; el resto no. En Windows, algunos programas (LibreOffice, Tesseract, Node) hacen que Windows pregunte si se permiten cambios: hay que darle a **Sí**. La primera corrida baja unos 2 GB y tarda de 20 a 40 minutos. Lo que ya existiera en `~/.claude` queda en `~/.claude/respaldo-<fecha>/`.
 

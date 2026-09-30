@@ -3,6 +3,7 @@
 # Común a Mac; el equivalente para Windows está en lib-config.ps1.
 #
 # Reglas:
+#  - Un CLAUDE.md o un settings.json que la persona ya tenía no se reemplaza (ver _copiar_capa).
 #  - Lo que ya exista en ~/.claude se respalda en ~/.claude/respaldo-<fecha>/ antes de tocarlo.
 #  - config/ es la base para todos. perfiles/<nombre>/ se copia encima y gana.
 #  - Dentro de skills/, commands/ y agents/ se agregan carpetas; no se borran las que
@@ -40,6 +41,16 @@ _copiar_capa() {
   while IFS= read -r -d '' f; do
     rel="${f#"$capa"/}"
     [[ "$rel" == README.md ]] && continue
+    # Quien ya usaba Claude conserva lo suyo:
+    #  - su CLAUDE.md no se reemplaza; el del equipo va a equipo-adose.md y se importa al final.
+    #  - su settings.json no se toca; los plugins escriben ahí lo que necesitan.
+    if [[ "$rel" == CLAUDE.md && -f "$destino/CLAUDE.md" ]] && ! grep -qF "Claude para el equipo" "$destino/CLAUDE.md"; then
+      cp -p "$f" "$destino/equipo-adose.md"
+      grep -qF "@~/.claude/equipo-adose.md" "$destino/CLAUDE.md" \
+        || printf '\n\n## Reglas del equipo de ADOSE\n@~/.claude/equipo-adose.md\n' >> "$destino/CLAUDE.md"
+      continue
+    fi
+    [[ "$rel" == settings.json && -f "$destino/settings.json" ]] && continue
     # Se respalda solo la primera vez: así el original de la persona no lo pisa la capa siguiente.
     if [[ -e "$destino/$rel" && ! -e "$respaldo/$rel" ]]; then
       mkdir -p "$respaldo/$(dirname "$rel")"

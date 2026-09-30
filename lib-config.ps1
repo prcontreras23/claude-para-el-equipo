@@ -7,6 +7,16 @@ function Copiar-Capa($capa, $destino, $respaldo) {
   Get-ChildItem -Path $capa -Recurse -File | ForEach-Object {
     $rel = $_.FullName.Substring($capa.Length).TrimStart('\','/')
     if ($rel -eq "README.md") { return }
+    $dest0 = Join-Path $destino $rel
+    # Quien ya usaba Claude conserva lo suyo (ver lib-config.sh).
+    if ($rel -eq "CLAUDE.md" -and (Test-Path $dest0) -and -not (Select-String -Path $dest0 -Pattern "Claude para el equipo" -SimpleMatch -Quiet)) {
+      Copy-Item $_.FullName (Join-Path $destino "equipo-adose.md") -Force
+      if (-not (Select-String -Path $dest0 -Pattern "@~/.claude/equipo-adose.md" -SimpleMatch -Quiet)) {
+        Add-Content -Path $dest0 -Value "`r`n`r`n## Reglas del equipo de ADOSE`r`n@~/.claude/equipo-adose.md" -Encoding UTF8
+      }
+      return
+    }
+    if ($rel -eq "settings.json" -and (Test-Path $dest0)) { return }
     $dest = Join-Path $destino $rel
     $bk = Join-Path $respaldo $rel
     # Se respalda solo la primera vez: el original no lo pisa la capa siguiente.

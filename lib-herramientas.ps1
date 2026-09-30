@@ -6,7 +6,7 @@
 #   uv       -> un Python propio con las librerias de documentos (queda primero en el PATH)
 #   npm      -> docx y pptxgenjs (los usan los skills de Word y PowerPoint)
 #   Whisper  -> whisper.cpp oficial (GitHub) + modelo large-v3-turbo q5_0 (~550 MB)
-#   Claude   -> plugin oficial document-skills de Anthropic
+#   Claude   -> plugins oficiales: document-skills y los de oficina
 #   Office   -> complementos de Claude en Word, Excel y PowerPoint (AppSource)
 #
 # Sin tildes a proposito: PowerShell 5 lee mal los .ps1 en UTF-8 sin BOM.
@@ -35,7 +35,7 @@ $script:WingetPaquetes = [ordered]@{
 }
 $script:PyLibs  = @("pypdf","pdfplumber","pymupdf","pikepdf","reportlab","pdf2image","img2pdf","pytesseract",
                     "python-docx","openpyxl","xlsxwriter","pandas","python-pptx","pillow","matplotlib","defusedxml",
-                    "markitdown[all]")
+                    "markitdown[all]","qrcode")
 $script:NpmLibs = @("docx","pptxgenjs")
 
 # ------------------------------------------------------------------ PATH
@@ -211,15 +211,36 @@ function Instalar-ModeloWhisper {
   return (Tiene-ModeloWhisper)
 }
 
-# ------------------------------------------------------------------ Skills oficiales de documentos
+# ------------------------------------------------------------------ Plugins y skills de oficina
 
-function Tiene-SkillsDocs { return ((claude plugin list 2>&1 | Out-String) -match "document-skills") }
+# Plugins oficiales de Anthropic: document-skills (PDF, Word, Excel, PowerPoint)
+# y los de trabajo de oficina de knowledge-work-plugins. Se declaran tambien en
+# config/settings.json y se instalan despues de aplicar la configuracion, porque
+# instalar escribe en settings.json. Se corre siempre: instalar dos veces no hace dano.
+$script:Marketplaces = @("anthropics/skills","anthropics/knowledge-work-plugins")
+$script:Plugins = @("document-skills@anthropic-agent-skills",
+  "productivity@knowledge-work-plugins","enterprise-search@knowledge-work-plugins",
+  "operations@knowledge-work-plugins","human-resources@knowledge-work-plugins",
+  "finance@knowledge-work-plugins","data@knowledge-work-plugins",
+  "marketing@knowledge-work-plugins","pdf-viewer@knowledge-work-plugins")
 
-function Instalar-SkillsDocs {
-  if (Tiene-SkillsDocs) { return $true }
-  claude plugin marketplace add anthropics/skills 2>&1 | Out-Null
-  claude plugin install document-skills@anthropic-agent-skills 2>&1 | Out-Null
-  return (Tiene-SkillsDocs)
+function Plugins-Faltan {
+  $lista = (claude plugin list 2>&1 | Out-String)
+  return @($script:Plugins | Where-Object { $lista -notlike "*$_*" } | ForEach-Object { ($_ -split "@")[0] })
+}
+
+function Tiene-Plugins { return ((Plugins-Faltan).Count -eq 0) }
+
+function Instalar-Plugins {
+  foreach ($m in $script:Marketplaces) { claude plugin marketplace add $m 2>&1 | Out-Null }
+  claude plugin marketplace update 2>&1 | Out-Null
+  foreach ($p in $script:Plugins) { claude plugin install $p 2>&1 | Out-Null }
+  return (Tiene-Plugins)
+}
+
+function Sesion-ClaudeCodeActiva {
+  $st = (claude auth status 2>&1 | Out-String)
+  return (($st -match '"loggedIn":\s*true') -or (Tiene-SesionClaudeCode))
 }
 
 # ------------------------------------------------------------------ Claude en Word, Excel y PowerPoint

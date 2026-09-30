@@ -35,3 +35,7 @@ El instalador dejó lo siguiente. Úsalo antes de decir que algo no se puede hac
 - **Audio y video**: `ffmpeg`; `yt-dlp` para bajar audio o video de un enlace.
 - **Transcribir audio**: primero `ffmpeg -i entrada -ar 16000 -ac 1 audio.wav`, luego `whisper-cli -m <modelo> -l es -f audio.wav -otxt`. Modelo — Mac: `~/.local/share/claude-equipo/whisper/ggml-large-v3-turbo-q5_0.bin` · Windows: `%LOCALAPPDATA%\claude-equipo\whisper\ggml-large-v3-turbo-q5_0.bin`.
 - **Claude en Office**: Word, Excel y PowerPoint tienen el complemento de Claude (Inicio → Complementos), si Office está instalado.
+
+## Sobre la persona que usa esta computadora
+@~/.claude/sobre-mi.md
+@~/.claude/segundo-cerebro.md
