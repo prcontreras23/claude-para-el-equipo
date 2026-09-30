@@ -40,6 +40,12 @@ tiene_claude_ok() { tiene claude; }
 # entrada es /dev/tty, porque kqueue de macOS no acepta ese dispositivo.
 real_tty="$(ps -o tty= -p $$ 2>/dev/null | tr -d ' ')"
 [[ -n "$real_tty" && "$real_tty" != "??" && -c "/dev/$real_tty" ]] && real_tty="/dev/$real_tty" || real_tty=""
+# Y no solo al abrirlo: `claude plugin`, `claude mcp` y `claude auth status` también se
+# caen si heredan /dev/tty como entrada (visto en la Mac del pastor Roberto Matos: no
+# quedó ningún plugin). Por eso todo el script toma la entrada de /dev/null; las
+# preguntas leen explícitamente de /dev/tty, y lo que necesita teclado de verdad
+# (contraseña de Homebrew, claude auth login, abrir claude) recibe $real_tty.
+exec < /dev/null
 
 diagnostico() {
   ruta_extendida

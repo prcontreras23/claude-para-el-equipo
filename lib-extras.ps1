@@ -47,7 +47,11 @@ function Instalar-FastTrack {
 
 # ------------------------------------------------------------------ WhatsApp (opcional)
 
-function Tiene-WhatsApp { claude mcp get whatsapp 2>&1 | Out-Null; return ($LASTEXITCODE -eq 0) }
+# whatsapp-para-claude registra el conector como «whatsapp-<instancia>».
+function Tiene-WhatsApp {
+  $f = Join-Path $env:USERPROFILE ".claude.json"
+  return ((Test-Path $f) -and (Select-String -Path $f -Pattern '"whatsapp[^"]*":\s*\{' -Quiet))
+}
 
 function Paso-WhatsApp {
   if (Tiene-WhatsApp) { Verde "WhatsApp ya está conectado con Claude"; return }

@@ -54,7 +54,8 @@ instalar_fasttrack() {
 
 # ------------------------------------------------------------------ WhatsApp (opcional)
 
-tiene_whatsapp() { claude mcp get whatsapp >/dev/null 2>&1; }
+# whatsapp-para-claude registra el conector como «whatsapp-<instancia>».
+tiene_whatsapp() { grep -qsE '"whatsapp[^"]*": *\{' "$HOME/.claude.json"; }
 
 paso_whatsapp() {
   if tiene_whatsapp; then verde "WhatsApp ya está conectado con Claude"; return; fi
