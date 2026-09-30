@@ -37,6 +37,12 @@ paso_celular() {
   gris "Abre la cámara del celular y apunta a este código:"
   echo; mostrar_qr "$url"; echo
   gris "Instala la app y entra con el mismo correo (te llega un código)."
+  if [[ "$t" == "1" ]]; then
+    gris "Si el iPhone dice que no se puede descargar por restricciones de contenido: la app"
+    gris "es 18+. Ajustes → Tiempo en pantalla → Restricciones de contenido y privacidad →"
+    gris "Restricciones de contenido de la App Store → Apps → 18+. Si pide un código, es el"
+    gris "de Tiempo en pantalla (no el del teléfono)."
+  fi
   esperar "Cuando ya estés dentro de la app, presiona Enter..."
   verde "App del celular"
 }

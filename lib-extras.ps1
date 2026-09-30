@@ -31,6 +31,12 @@ function Paso-Celular {
   Gris "Abre la cámara del celular y apunta a este código:"
   Write-Host ""; Mostrar-Qr $url; Write-Host ""
   Gris "Instala la app y entra con el mismo correo (te llega un código)."
+  if ($t -eq "1") {
+    Gris "Si el iPhone dice que no se puede descargar por restricciones de contenido: la app"
+    Gris "es 18+. Ajustes → Tiempo en pantalla → Restricciones de contenido y privacidad →"
+    Gris "Restricciones de contenido de la App Store → Apps → 18+. Si pide un código, es el"
+    Gris "de Tiempo en pantalla (no el del teléfono)."
+  }
   Esperar "Cuando ya estés dentro de la app, presiona Enter..."
   Verde "App del celular"
 }
