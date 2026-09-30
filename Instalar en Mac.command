@@ -190,13 +190,13 @@ gris "Así Claude puede leer tus correos, ver tu agenda y buscar en tus document
 gris "se lo pidas. Sirve en claude.ai, Claude Desktop, Cowork y Claude Code."
 if ya_hecho "¿Ya conectaste tu correo y tu calendario en claude.ai?"; then verde "Conectores"
 else
-  gris "Se abre la página de conectores. Dale a «Conectar» en los que uses:"
+  gris "Se abre Personalización → Conectores. En «Descubrir», dale a «Conectar» en los que uses:"
   gris "  • Microsoft 365 — Outlook, calendario, OneDrive y Teams (el correo del trabajo)"
   gris "  • Gmail y Google Calendar — si también usas Google"
   gris "  • Google Drive — si guardas documentos ahí"
-  gris "  • FastTrack — «Agregar conector personalizado» y pega: $FASTTRACK_URL"
+  gris "  • FastTrack — en «Añadir» → conector personalizado, pega: $FASTTRACK_URL"
   gris "Si Microsoft 365 no aparece, avisa a Secretaría: lo activa el administrador del equipo."
-  abrir_web "https://claude.ai/settings/connectors"
+  abrir_web "https://claude.ai/customize/connectors"
   esperar "Cuando hayas conectado los que usas, presiona Enter..."
   verde "Conectores"
 fi
@@ -219,10 +219,10 @@ if [[ "$rehacer" == "s" ]]; then
   printf '%s' "$PERFIL_TEXTO" | pbcopy
   gris "Ya copié este texto; solo tienes que pegarlo con Cmd+V:"
   echo; printf '%s\n' "$PERFIL_TEXTO" | fold -s -w 86 | sed 's/^/    /'; echo
-  gris "Se abre tu perfil en claude.ai. Pon tu nombre donde dice cómo llamarte y pega el"
-  gris "texto en «preferencias personales». Dale a Guardar."
-  gris "Si ves la opción de Memoria, actívala: así Claude recuerda lo que vas trabajando."
-  abrir_web "https://claude.ai/settings/profile"
+  gris "Se abre tu cuenta en claude.ai. Pon tu nombre en «¿Cómo quieres que Claude te llame?»,"
+  gris "escoge la descripción más parecida a tu trabajo y pega el texto en «Instrucciones para Claude»."
+  gris "Luego, en «Memoria» (a la izquierda), actívala: así Claude recuerda lo que vas trabajando."
+  abrir_web "https://claude.ai/settings/account"
   esperar "Cuando lo hayas guardado, presiona Enter..."
 fi
 verde "Perfil"

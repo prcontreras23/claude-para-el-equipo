@@ -154,13 +154,13 @@ Gris "Así Claude puede leer tus correos, ver tu agenda y buscar en tus document
 Gris "se lo pidas. Sirve en claude.ai, Claude Desktop, Cowork y Claude Code."
 if (Ya-Hecho "¿Ya conectaste tu correo y tu calendario en claude.ai?") { Verde "Conectores" }
 else {
-  Gris "Se abre la página de conectores. Dale a «Conectar» en los que uses:"
+  Gris "Se abre Personalización → Conectores. En «Descubrir», dale a «Conectar» en los que uses:"
   Gris "  • Microsoft 365 — Outlook, calendario, OneDrive y Teams (el correo del trabajo)"
   Gris "  • Gmail y Google Calendar — si también usas Google"
   Gris "  • Google Drive — si guardas documentos ahí"
-  Gris "  • FastTrack — «Agregar conector personalizado» y pega: $script:FastTrackUrl"
+  Gris "  • FastTrack — en «Añadir» → conector personalizado, pega: $script:FastTrackUrl"
   Gris "Si Microsoft 365 no aparece, avisa a Secretaría: lo activa el administrador del equipo."
-  Abrir-Web "https://claude.ai/settings/connectors"
+  Abrir-Web "https://claude.ai/customize/connectors"
   Esperar "Cuando hayas conectado los que usas, presiona Enter..."
   Verde "Conectores"
 }
@@ -180,10 +180,10 @@ if ($rehacer) {
   Set-Clipboard -Value $texto
   Gris "Ya copié este texto; solo tienes que pegarlo con Ctrl+V:"
   Write-Host ""; Write-Host "    $texto" -ForegroundColor Cyan; Write-Host ""
-  Gris "Se abre tu perfil en claude.ai. Pon tu nombre donde dice cómo llamarte y pega el"
-  Gris "texto en «preferencias personales». Dale a Guardar."
-  Gris "Si ves la opción de Memoria, actívala: así Claude recuerda lo que vas trabajando."
-  Abrir-Web "https://claude.ai/settings/profile"
+  Gris "Se abre tu cuenta en claude.ai. Pon tu nombre en «¿Cómo quieres que Claude te llame?»,"
+  Gris "escoge la descripción más parecida a tu trabajo y pega el texto en «Instrucciones para Claude»."
+  Gris "Luego, en «Memoria» (a la izquierda), actívala: así Claude recuerda lo que vas trabajando."
+  Abrir-Web "https://claude.ai/settings/account"
   Esperar "Cuando lo hayas guardado, presiona Enter..."
 }
 Verde "Perfil"

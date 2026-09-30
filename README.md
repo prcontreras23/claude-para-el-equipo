@@ -77,8 +77,8 @@ En Mac el doble clic en `Instalar en Mac.command` **no funciona si el archivo se
 | Paso | Qué hace |
 |---|---|
 | 1. Entrar a claude.ai | Abre `claude.ai/login` |
-| 2. Conectores | Abre `claude.ai/settings/connectors` para conectar Microsoft 365 (Outlook, calendario, OneDrive, Teams), Gmail, Google Calendar, Google Drive y FastTrack |
-| 3. Perfil | Seis preguntas (nombre, cargo, oficina, tareas, programas, estilo). Guarda `~/.claude/sobre-mi.md` y copia al portapapeles el texto para el perfil de claude.ai |
+| 2. Conectores | Abre `claude.ai/customize/connectors` (Personalización → Conectores) para conectar Microsoft 365 (Outlook, calendario, OneDrive, Teams), Gmail, Google Calendar, Google Drive y FastTrack |
+| 3. Perfil | Seis preguntas (nombre, cargo, oficina, tareas, programas, estilo). Guarda `~/.claude/sobre-mi.md` y copia al portapapeles el texto para «Instrucciones para Claude» (claude.ai → Configuración → Cuenta) |
 | 4. Claude Desktop | Comprueba que esté instalada, la abre y espera a que la persona entre |
 | 5. Extensión de Chrome | No sigue hasta detectarla instalada |
 | 6. App del celular | iPhone o Android, con código QR en la Terminal |
