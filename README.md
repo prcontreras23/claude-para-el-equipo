@@ -54,7 +54,7 @@ En Mac el doble clic en `Instalar en Mac.command` **no funciona si el archivo se
 
 ## Qué hace
 
-**1. Diagnóstico.** Revisa la máquina y marca qué hay y qué falta: git, Claude Code, Claude Desktop (trae Cowork), Google Chrome, la extensión de Claude en Chrome, la configuración del equipo y la sesión de Claude Code.
+**1. Diagnóstico.** Revisa la máquina y marca qué hay y qué falta: git, Claude Code, Claude Desktop (trae Cowork), Google Chrome, la extensión de Claude en Chrome, las herramientas de documentos, OCR y audio, Claude en Word/Excel/PowerPoint, la configuración del equipo y la sesión de Claude Code.
 
 **2. Instala lo que falte**, solo:
 
@@ -64,6 +64,10 @@ En Mac el doble clic en `Instalar en Mac.command` **no funciona si el archivo se
 | Claude Code | `claude.ai/install.sh` (queda en `~/.local/bin`, se actualiza solo) | `claude.ai/install.ps1` |
 | Claude Desktop | Descarga de `downloads.claude.ai`, verificada por checksum y firma de **Anthropic PBC** | winget `Anthropic.Claude` |
 | Google Chrome | Descarga de `dl.google.com`, verificada por firma de **Google** | winget `Google.Chrome`, o instalador oficial verificado por firma |
+| Herramientas (PDF, Office, imágenes, OCR, audio) | Homebrew: poppler, qpdf, tesseract + español, pandoc, ffmpeg, ImageMagick, exiftool, whisper-cpp, node, yt-dlp, LibreOffice | winget: los mismos (whisper.cpp desde su GitHub oficial) |
+| Python de documentos | `uv` + Python 3.12 en `~/.local/share/claude-equipo/python` con pypdf, pdfplumber, pymupdf, pikepdf, reportlab, python-docx, openpyxl, pandas, python-pptx, pillow, pytesseract, markitdown… | Igual, en `%LOCALAPPDATA%\claude-equipo\python` |
+| Transcripción | Modelo whisper `large-v3-turbo` q5_0 (~550 MB) | Igual |
+| Skills de documentos | Plugin oficial `document-skills` de Anthropic en Claude Code | Igual |
 | Configuración | Copia `config/` a `~/.claude/` y encima el perfil, si lo hay | Igual, en `%USERPROFILE%\.claude\` |
 
 **3. Pasos que hace la persona.** El instalador no sigue hasta que cada uno quede hecho:
@@ -73,9 +77,10 @@ En Mac el doble clic en `Instalar en Mac.command` **no funciona si el archivo se
 | A. Entrar en claude.ai | Abre `claude.ai/login` y espera |
 | B. Claude Desktop | Si no quedó instalada, abre `claude.ai/download` y no sigue hasta encontrarla; luego la abre para entrar |
 | C. Extensión de Chrome | Abre la extensión en la Chrome Web Store y no sigue hasta que aparece instalada; luego pide entrar en ella |
-| D. Claude Code | Muestra el diagnóstico final y abre `claude` para entrar con la cuenta |
+| D. Claude en Word, Excel y PowerPoint | Por cada app de Office instalada, abre el complemento de Claude en AppSource y comprueba en la caché de Office que quedó (3 intentos) |
+| E. Claude Code | Muestra el diagnóstico final y abre `claude` para entrar con la cuenta |
 
-Nada pide contraseña de administrador (salvo el diálogo de Apple para las Command Line Tools, que es del sistema). Lo que ya existiera en `~/.claude` queda en `~/.claude/respaldo-<fecha>/`.
+En Mac, **Homebrew pide una vez la contraseña de la computadora**; el resto no. En Windows, algunos programas (LibreOffice, Tesseract, Node) hacen que Windows pregunte si se permiten cambios: hay que darle a **Sí**. La primera corrida baja unos 2 GB y tarda de 20 a 40 minutos. Lo que ya existiera en `~/.claude` queda en `~/.claude/respaldo-<fecha>/`.
 
 Se puede volver a correr las veces que haga falta: lo instalado se detecta y se salta; la configuración se vuelve a aplicar.
 
@@ -83,10 +88,14 @@ Se puede volver a correr las veces que haga falta: lo instalado se detecta y se 
 | git | Command Line Tools de Xcode (diálogo del sistema) | winget `Git.Git`, o instalador oficial silencioso |
 | Claude Code | `claude.ai/install.sh` (queda en `~/.local/bin`, se actualiza solo) | `claude.ai/install.ps1` |
 | Claude Desktop | Descarga de `downloads.claude.ai`, verificada por checksum y firma de **Anthropic PBC** | winget `Anthropic.Claude` |
+| Herramientas (PDF, Office, imágenes, OCR, audio) | Homebrew: poppler, qpdf, tesseract + español, pandoc, ffmpeg, ImageMagick, exiftool, whisper-cpp, node, yt-dlp, LibreOffice | winget: los mismos (whisper.cpp desde su GitHub oficial) |
+| Python de documentos | `uv` + Python 3.12 en `~/.local/share/claude-equipo/python` con pypdf, pdfplumber, pymupdf, pikepdf, reportlab, python-docx, openpyxl, pandas, python-pptx, pillow, pytesseract, markitdown… | Igual, en `%LOCALAPPDATA%\claude-equipo\python` |
+| Transcripción | Modelo whisper `large-v3-turbo` q5_0 (~550 MB) | Igual |
+| Skills de documentos | Plugin oficial `document-skills` de Anthropic en Claude Code | Igual |
 | Configuración | Copia `config/` a `~/.claude/` y encima el perfil, si lo hay | Igual, en `%USERPROFILE%\.claude\` |
 | Sesión | Abre `claude` para que la persona entre con su cuenta (navegador) | Igual |
 
-Nada pide contraseña de administrador (salvo el diálogo de Apple para las Command Line Tools, que es del sistema). Lo que ya existiera en `~/.claude` queda en `~/.claude/respaldo-<fecha>/`.
+En Mac, **Homebrew pide una vez la contraseña de la computadora**; el resto no. En Windows, algunos programas (LibreOffice, Tesseract, Node) hacen que Windows pregunte si se permiten cambios: hay que darle a **Sí**. La primera corrida baja unos 2 GB y tarda de 20 a 40 minutos. Lo que ya existiera en `~/.claude` queda en `~/.claude/respaldo-<fecha>/`.
 
 Se puede volver a correr las veces que haga falta: lo instalado se detecta y se salta; la configuración se vuelve a aplicar.
 

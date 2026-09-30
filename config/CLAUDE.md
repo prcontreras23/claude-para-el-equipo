@@ -22,3 +22,16 @@
 
 ## Formato de fechas y horas
 - Zona horaria America/Santo_Domingo · formato 24 h · fechas `YYYY-MM-DD` en nombres de archivo.
+
+## Herramientas instaladas en esta computadora
+El instalador dejó lo siguiente. Úsalo antes de decir que algo no se puede hacer.
+
+- **Python con librerías de documentos**: `python3` ya trae pypdf, pdfplumber, pymupdf, pikepdf, reportlab, pdf2image, img2pdf, python-docx, openpyxl, xlsxwriter, pandas, python-pptx, pillow, matplotlib, pytesseract y markitdown. (Mac: `~/.local/share/claude-equipo/python` · Windows: `%LOCALAPPDATA%\claude-equipo\python`.)
+- **PDF**: `pdftotext -layout`, `pdftoppm -png -r 300` (páginas a imagen), `qpdf` (unir, dividir, desbloquear, reparar).
+- **OCR**: `tesseract imagen.png salida -l spa+eng`. Para un PDF escaneado: `pdftoppm` a imágenes y luego `tesseract` página por página. Si el texto sale basura, probar a rotar la imagen 180° antes de darlo por ilegible.
+- **Word, Excel y PowerPoint**: `soffice --headless --convert-to pdf archivo.docx` (también a docx, xlsx, pptx); `pandoc` para Markdown ↔ Word; `markitdown archivo` para leer cualquier documento como texto. Node trae `docx` y `pptxgenjs` para crear Word y PowerPoint.
+- **Skills de documentos**: el plugin oficial `document-skills` de Anthropic (pdf, docx, xlsx, pptx) está instalado en Claude Code.
+- **Imágenes**: `magick` (ImageMagick) para convertir, redimensionar y recortar; `exiftool` para metadatos.
+- **Audio y video**: `ffmpeg`; `yt-dlp` para bajar audio o video de un enlace.
+- **Transcribir audio**: primero `ffmpeg -i entrada -ar 16000 -ac 1 audio.wav`, luego `whisper-cli -m <modelo> -l es -f audio.wav -otxt`. Modelo — Mac: `~/.local/share/claude-equipo/whisper/ggml-large-v3-turbo-q5_0.bin` · Windows: `%LOCALAPPDATA%\claude-equipo\whisper\ggml-large-v3-turbo-q5_0.bin`.
+- **Claude en Office**: Word, Excel y PowerPoint tienen el complemento de Claude (Inicio → Complementos), si Office está instalado.
