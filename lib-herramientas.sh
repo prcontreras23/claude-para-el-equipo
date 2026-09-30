@@ -52,18 +52,19 @@ instalar_brew() {
   grep -qsF 'brew shellenv' "$rc" || echo "eval \"\$($(command -v brew) shellenv)\"" >> "$rc"
 }
 
+# Sin arreglos vacíos: con set -u, el bash 3.2 de macOS da «unbound variable» al
+# expandir "${arreglo[@]}" si está vacío.
 brew_falta() {
-  local f faltan=()
+  local f
   ruta_extendida
-  for f in "${BREW_FORMULAS[@]}"; do tiene "${f#*:}" || faltan+=("${f%%:*}"); done
-  printf '%s\n' "${faltan[@]}"
+  for f in "${BREW_FORMULAS[@]}"; do tiene "${f#*:}" || echo "${f%%:*}"; done
 }
 
 instalar_formulas() {
-  local faltan; faltan=($(brew_falta))
-  [[ ${#faltan[@]} -eq 0 ]] && return 0
-  gris "Instalando: ${faltan[*]}"
-  HOMEBREW_NO_ENV_HINTS=1 brew install "${faltan[@]}" >/dev/null 2>&1
+  local faltan; faltan="$(brew_falta | tr '\n' ' ')"
+  [[ -z "${faltan// /}" ]] && return 0
+  gris "Instalando: $faltan"
+  HOMEBREW_NO_ENV_HINTS=1 brew install $faltan >/dev/null 2>&1
   [[ -z "$(brew_falta)" ]]
 }
 

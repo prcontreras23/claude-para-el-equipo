@@ -132,13 +132,16 @@ if tiene_brew; then
   gris "Programas (esto puede tardar 10–20 minutos la primera vez)..."
   if instalar_formulas; then verde "poppler, qpdf, tesseract, pandoc, ffmpeg, ImageMagick, exiftool, whisper, node, yt-dlp"
   else rojo "No quedaron todos: $(brew_falta | tr '\n' ' ')"; fi
+  tiene_libreoffice || gris "Bajando LibreOffice (~300 MB, unos minutos; no cierres esta ventana)..."
   if instalar_libreoffice; then verde "LibreOffice"; else rojo "LibreOffice no quedó instalado."; fi
   if instalar_ocr_es; then verde "OCR en español"; else rojo "No se pudo bajar el español para el OCR."; fi
+  tiene_npm_docs || gris "Instalando docx y pptxgenjs..."
   if instalar_npm_docs; then verde "Node: docx y pptxgenjs"; else rojo "No se pudieron instalar docx y pptxgenjs."; fi
 else
   rojo "Sin Homebrew se saltan: PDF, OCR, LibreOffice, pandoc, ffmpeg, ImageMagick, whisper y node."
 fi
 
+tiene_python_docs || gris "Preparando Python con las librerías de documentos (unos minutos)..."
 if instalar_uv && instalar_python_docs; then persistir_python_docs; verde "Python con librerías de PDF, Word, Excel, PowerPoint, imágenes y OCR"
 else rojo "No se pudo preparar el Python con las librerías de documentos."; fi
 
