@@ -72,7 +72,7 @@ tiene_libreoffice() { [[ -d /Applications/LibreOffice.app || -d "$HOME/Applicati
 
 instalar_libreoffice() {
   tiene_libreoffice && return 0
-  HOMEBREW_NO_ENV_HINTS=1 brew install --cask libreoffice >/dev/null 2>&1
+  HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ENV_HINTS=1 brew install --cask libreoffice >/dev/null 2>&1
   tiene_libreoffice
 }
 

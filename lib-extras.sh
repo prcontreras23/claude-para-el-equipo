@@ -80,7 +80,7 @@ tiene_obsidian() { [[ -d /Applications/Obsidian.app || -d "$HOME/Applications/Ob
 instalar_obsidian() {
   tiene_obsidian && return 0
   tiene_brew || return 1
-  HOMEBREW_NO_ENV_HINTS=1 brew install --cask obsidian >/dev/null 2>&1
+  HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ENV_HINTS=1 brew install --cask obsidian >/dev/null 2>&1
   tiene_obsidian
 }
 
@@ -163,7 +163,7 @@ paso_segundo_cerebro() {
   fi
   if ! ya_hecho "¿Quieres configurarlo ahora? Es opcional"; then gris "Se salta. Lo puedes hacer después volviendo a correr el instalador."; return; fi
 
-  gris "Instalando Obsidian..."
+  tiene_obsidian || gris "Bajando Obsidian (~220 MB, unos minutos; no cierres esta ventana)..."
   if instalar_obsidian; then verde "Obsidian"; else rojo "No se pudo instalar Obsidian. Bájalo de obsidian.md y vuelve a correr esto."; return; fi
 
   echo
