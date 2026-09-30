@@ -22,8 +22,19 @@ morir() { echo; rojo "  ✗ $*"; echo; exit 1; }
 
 echo; printf '\033[1m%s\033[0m\n' "Bajando Claude para el equipo..."; echo
 rm -rf "$FUENTE"; mkdir -p "$FUENTE"
-curl -fsSL "https://github.com/$REPO/archive/refs/heads/main.tar.gz" | tar -xz -C "$FUENTE" --strip-components=1 \
-  || morir "No se pudo bajar. Revisa que tengas internet e inténtalo otra vez."
+# Dos servidores de GitHub con el mismo paquete: si el DNS de la red no encuentra
+# github.com (pasó en la oficina), se prueba codeload.github.com.
+bajar() {
+  local url
+  for url in "https://github.com/$REPO/archive/refs/heads/main.tar.gz" \
+             "https://codeload.github.com/$REPO/tar.gz/refs/heads/main"; do
+    rm -rf "$FUENTE"; mkdir -p "$FUENTE"
+    curl -fsSL --retry 2 "$url" 2>/dev/null | tar -xz -C "$FUENTE" --strip-components=1 2>/dev/null \
+      && [[ -f "$FUENTE/Instalar en Mac.command" ]] && return 0
+  done
+  return 1
+}
+bajar || morir "No se pudo bajar de GitHub. Si tienes internet, puede ser el DNS de la red: espera un minuto e inténtalo otra vez."
 chmod +x "$FUENTE/Instalar en Mac.command" 2>/dev/null
 verde "  ✓ listo"; gris "  archivos en $FUENTE"
 

@@ -17,8 +17,13 @@ function Morir($m) { Write-Host ""; Write-Host "  X $m" -ForegroundColor Red; Wr
 Write-Host ""; Write-Host "Bajando Claude para el equipo..." -ForegroundColor White; Write-Host ""
 
 $zip = Join-Path $env:TEMP "claude-para-el-equipo.zip"
-try { Invoke-WebRequest -Uri "https://github.com/$Repo/archive/refs/heads/main.zip" -OutFile $zip -UseBasicParsing }
-catch { Morir "No se pudo bajar. Revisa que tengas internet e intentalo otra vez." }
+# Dos servidores de GitHub con el mismo paquete: si el DNS de la red no encuentra
+# github.com, se prueba codeload.github.com.
+$bajado = $false
+foreach ($url in @("https://github.com/$Repo/archive/refs/heads/main.zip", "https://codeload.github.com/$Repo/zip/refs/heads/main")) {
+  try { Invoke-WebRequest -Uri $url -OutFile $zip -UseBasicParsing; $bajado = $true; break } catch {}
+}
+if (-not $bajado) { Morir "No se pudo bajar de GitHub. Si tienes internet, puede ser el DNS de la red: espera un minuto e intentalo otra vez." }
 
 if (Test-Path $Fuente) { Remove-Item -Recurse -Force $Fuente -ErrorAction SilentlyContinue }
 New-Item -ItemType Directory -Force -Path $Fuente | Out-Null
