@@ -67,12 +67,7 @@ function Instalar-Claude {
 # ------------------------------------------------------------------ Claude Desktop
 
 function Tiene-ClaudeDesktop {
-  $rutas = @(
-    (Join-Path $env:LOCALAPPDATA "Programs\Claude\Claude.exe"),
-    (Join-Path $env:LOCALAPPDATA "AnthropicClaude\Claude.exe"),
-    "C:\Program Files\Claude\Claude.exe"
-  )
-  foreach ($r in $rutas) { if (Test-Path $r) { return $true } }
+  if (Ruta-ClaudeDesktop) { return $true }
   if (Tiene winget) {
     $l = winget list --id Anthropic.Claude -e 2>$null | Out-String
     if ($l -match "Anthropic\.Claude") { return $true }
@@ -97,3 +92,67 @@ function Persistir-Ruta {
     }
   } catch {}
 }
+
+function Ruta-ClaudeDesktop {
+  $rutas = @(
+    (Join-Path $env:LOCALAPPDATA "AnthropicClaude\claude.exe"),
+    (Join-Path $env:LOCALAPPDATA "Programs\Claude\Claude.exe"),
+    "C:\Program Files\Claude\Claude.exe"
+  )
+  foreach ($r in $rutas) { if (Test-Path $r) { return $r } }
+  return $null
+}
+
+# ------------------------------------------------------------------ Google Chrome
+
+function Ruta-Chrome {
+  # ProgramFiles(x86) no existe en Windows de 32 bits; se saltan las bases vacias.
+  foreach ($base in @($env:ProgramFiles, ${env:ProgramFiles(x86)}, $env:LOCALAPPDATA)) {
+    if (-not $base) { continue }
+    $r = Join-Path $base "Google\Chrome\Application\chrome.exe"
+    if (Test-Path $r) { return $r }
+  }
+  return $null
+}
+
+function Tiene-Chrome { return ($null -ne (Ruta-Chrome)) }
+
+function Instalar-Chrome {
+  if (Tiene-Chrome) { return $true }
+  if (Probar-Winget "Google.Chrome") { if (Tiene-Chrome) { return $true } }
+
+  # Instalador oficial de Google, verificado por su firma.
+  try {
+    $exe = Join-Path $env:TEMP "chrome_installer.exe"
+    Invoke-WebRequest -Uri "https://dl.google.com/chrome/install/latest/chrome_installer.exe" -OutFile $exe -UseBasicParsing
+    $firma = Get-AuthenticodeSignature $exe
+    if ($firma.Status -ne "Valid" -or $firma.SignerCertificate.Subject -notlike "*Google LLC*") {
+      Remove-Item $exe -ErrorAction SilentlyContinue; return $false
+    }
+    Start-Process -FilePath $exe -ArgumentList "/silent","/install" -Wait
+    Remove-Item $exe -ErrorAction SilentlyContinue
+    # El instalador de Google sigue trabajando un rato despues de salir.
+    for ($i = 0; $i -lt 36 -and -not (Tiene-Chrome); $i++) { Start-Sleep -Seconds 5 }
+  } catch { return $false }
+  return (Tiene-Chrome)
+}
+
+# ------------------------------------------------------------------ Extension de Claude en Chrome
+
+$script:ChromeExtId  = "fcoeoabgfenejglbffodgkkbkcdhcgfn"   # "Claude" en la Chrome Web Store
+$script:ChromeExtUrl = "https://chromewebstore.google.com/detail/$script:ChromeExtId"
+
+# Chrome no deja instalar extensiones desde fuera sin permisos de administrador;
+# la persona le da a "Anadir a Chrome". Aqui solo se comprueba que quedo.
+function Tiene-ExtChrome {
+  return (Test-Path (Join-Path $env:LOCALAPPDATA "Google\Chrome\User Data\*\Extensions\$script:ChromeExtId"))
+}
+
+# ------------------------------------------------------------------ Sesiones y configuracion
+
+function Tiene-SesionClaudeCode {
+  $f = Join-Path $env:USERPROFILE ".claude.json"
+  return ((Test-Path $f) -and (Select-String -Path $f -Pattern '"oauthAccount"' -Quiet))
+}
+
+function Tiene-ConfigEquipo { return (Test-Path (Join-Path $env:USERPROFILE ".claude\.claude-para-el-equipo")) }

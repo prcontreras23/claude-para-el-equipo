@@ -54,8 +54,32 @@ En Mac el doble clic en `Instalar en Mac.command` **no funciona si el archivo se
 
 ## Qué hace
 
+**1. Diagnóstico.** Revisa la máquina y marca qué hay y qué falta: git, Claude Code, Claude Desktop (trae Cowork), Google Chrome, la extensión de Claude en Chrome, la configuración del equipo y la sesión de Claude Code.
+
+**2. Instala lo que falte**, solo:
+
 | Paso | Mac | Windows |
 |---|---|---|
+| git | Command Line Tools de Xcode (diálogo del sistema) | winget `Git.Git`, o instalador oficial silencioso |
+| Claude Code | `claude.ai/install.sh` (queda en `~/.local/bin`, se actualiza solo) | `claude.ai/install.ps1` |
+| Claude Desktop | Descarga de `downloads.claude.ai`, verificada por checksum y firma de **Anthropic PBC** | winget `Anthropic.Claude` |
+| Google Chrome | Descarga de `dl.google.com`, verificada por firma de **Google** | winget `Google.Chrome`, o instalador oficial verificado por firma |
+| Configuración | Copia `config/` a `~/.claude/` y encima el perfil, si lo hay | Igual, en `%USERPROFILE%\.claude\` |
+
+**3. Pasos que hace la persona.** El instalador no sigue hasta que cada uno quede hecho:
+
+| Paso | Qué hace el instalador |
+|---|---|
+| A. Entrar en claude.ai | Abre `claude.ai/login` y espera |
+| B. Claude Desktop | Si no quedó instalada, abre `claude.ai/download` y no sigue hasta encontrarla; luego la abre para entrar |
+| C. Extensión de Chrome | Abre la extensión en la Chrome Web Store y no sigue hasta que aparece instalada; luego pide entrar en ella |
+| D. Claude Code | Muestra el diagnóstico final y abre `claude` para entrar con la cuenta |
+
+Nada pide contraseña de administrador (salvo el diálogo de Apple para las Command Line Tools, que es del sistema). Lo que ya existiera en `~/.claude` queda en `~/.claude/respaldo-<fecha>/`.
+
+Se puede volver a correr las veces que haga falta: lo instalado se detecta y se salta; la configuración se vuelve a aplicar.
+
+---|---|---|
 | git | Command Line Tools de Xcode (diálogo del sistema) | winget `Git.Git`, o instalador oficial silencioso |
 | Claude Code | `claude.ai/install.sh` (queda en `~/.local/bin`, se actualiza solo) | `claude.ai/install.ps1` |
 | Claude Desktop | Descarga de `downloads.claude.ai`, verificada por checksum y firma de **Anthropic PBC** | winget `Anthropic.Claude` |
@@ -79,9 +103,7 @@ Lo que **no** trae, a propósito: conectores (Gmail, Outlook, Notion, Drive…),
 
 ## Después de instalar
 
-1. Al abrirse Claude Code, elegir **Claude account** y entrar en el navegador con la cuenta invitada.
-2. Abrir **Claude Desktop** y entrar con la misma cuenta.
-3. Probar: en la Terminal (o PowerShell), entrar a una carpeta de trabajo y escribir `claude`.
+El propio instalador guía la entrada en claude.ai, Claude Desktop, la extensión de Chrome y Claude Code. Para trabajar después: abrir Claude Desktop (Chat, Cowork, Code) o, en la Terminal (o PowerShell), entrar a una carpeta y escribir `claude`.
 
 ---
 

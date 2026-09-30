@@ -15,6 +15,15 @@ ruta_extendida() {
 
 tiene() { command -v "$1" >/dev/null 2>&1; }
 
+# Comprueba quién firmó una app. La salida de codesign se guarda antes de buscar:
+# con `codesign | grep -q` y pipefail, grep corta la tubería al encontrar y
+# codesign muere por SIGPIPE, así que la prueba fallaba siempre aunque la firma
+# fuera buena.
+firmado_por() {
+  local salida; salida="$(codesign -dv --verbose=2 "$1" 2>&1)"
+  [[ "$salida" == *"Authority=$2"* ]]
+}
+
 # ------------------------------------------------------------------ git
 
 # En macOS git viene con las Command Line Tools de Xcode. Instalarlas abre un
@@ -85,8 +94,7 @@ instalar_claude_desktop() {
   local app; app="$(find "$tmp/extraido" -maxdepth 2 -name "Claude.app" -print -quit 2>/dev/null)"
   [[ -z "$app" ]] && { rm -rf "$tmp"; return 1; }
 
-  codesign -dv --verbose=2 "$app" 2>&1 | grep -q "Authority=Developer ID Application: Anthropic" \
-    || { rm -rf "$tmp"; return 4; }
+  firmado_por "$app" "Developer ID Application: Anthropic PBC" || { rm -rf "$tmp"; return 4; }
 
   local destino="/Applications"
   [[ -w "$destino" ]] || { destino="$HOME/Applications"; mkdir -p "$destino"; }
@@ -104,3 +112,47 @@ persistir_ruta() {
   [[ "${SHELL:-}" == *bash* ]] && rc="$HOME/.bash_profile"
   grep -qsF '.local/bin' "$rc" || echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$rc"
 }
+
+# ------------------------------------------------------------------ Google Chrome
+
+tiene_chrome() {
+  [[ -d "/Applications/Google Chrome.app" || -d "$HOME/Applications/Google Chrome.app" ]]
+}
+
+# Descarga oficial de Google. Se verifica que la app venga firmada por Google.
+instalar_chrome() {
+  tiene_chrome && return 0
+  local tmp; tmp="$(mktemp -d)"
+  curl -fL --max-time 900 "https://dl.google.com/chrome/mac/universal/stable/GGRO/googlechrome.dmg" \
+    -o "$tmp/chrome.dmg" 2>/dev/null || { rm -rf "$tmp"; return 1; }
+  hdiutil attach -nobrowse -quiet -mountpoint "$tmp/vol" "$tmp/chrome.dmg" 2>/dev/null || { rm -rf "$tmp"; return 1; }
+  local app="$tmp/vol/Google Chrome.app" r=0
+  if ! firmado_por "$app" "Developer ID Application: Google"; then
+    r=4
+  else
+    local destino="/Applications"
+    [[ -w "$destino" ]] || { destino="$HOME/Applications"; mkdir -p "$destino"; }
+    ditto "$app" "$destino/Google Chrome.app" 2>/dev/null || r=1
+  fi
+  hdiutil detach -quiet "$tmp/vol" 2>/dev/null
+  rm -rf "$tmp"
+  [[ $r -ne 0 ]] && return $r
+  tiene_chrome
+}
+
+# ------------------------------------------------------------------ Extensión de Claude en Chrome
+
+CHROME_EXT_ID="fcoeoabgfenejglbffodgkkbkcdhcgfn"   # «Claude» en la Chrome Web Store
+CHROME_EXT_URL="https://chromewebstore.google.com/detail/$CHROME_EXT_ID"
+
+# Chrome no deja instalar extensiones desde fuera sin permisos de administrador;
+# la persona le da a «Añadir a Chrome». Aquí solo se comprueba que quedó.
+tiene_ext_chrome() {
+  compgen -G "$HOME/Library/Application Support/Google/Chrome/*/Extensions/$CHROME_EXT_ID" >/dev/null
+}
+
+# ------------------------------------------------------------------ Sesiones y configuración
+
+# Claude Code guarda la cuenta en ~/.claude.json cuando ya se entró.
+tiene_sesion_claude_code() { grep -qs '"oauthAccount"' "$HOME/.claude.json"; }
+tiene_config_equipo()      { [[ -f "$HOME/.claude/.claude-para-el-equipo" ]]; }
