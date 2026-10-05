@@ -69,7 +69,10 @@ function Instalar-Claude {
 function Tiene-ClaudeDesktop {
   if (Ruta-ClaudeDesktop) { return $true }
   if (Tiene winget) {
-    $l = winget list --id Anthropic.Claude -e 2>$null | Out-String
+    # Sin --accept-source-agreements, la primera vez que se usa winget en la PC pregunta
+    # si se aceptan los terminos; como la salida va a Out-String, la pregunta no se ve
+    # y el instalador se queda esperando en el diagnostico.
+    $l = winget list --id Anthropic.Claude -e --accept-source-agreements 2>$null | Out-String
     if ($l -match "Anthropic\.Claude") { return $true }
   }
   return $false
