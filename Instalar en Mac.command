@@ -90,6 +90,20 @@ if ! curl -fsSI --max-time 15 "https://raw.githubusercontent.com/$REPO/main/READ
   rojo "No hay internet. Conéctate e inténtalo otra vez."; exit 1
 fi
 
+# ── 0. ¿Es del equipo de ADOSE? ─────────────────────────────────────────────
+# El contexto de ADOSE (quiénes somos, SIGA) y los ejemplos del perfil solo van si la
+# persona trabaja ahí. Con un perfil por argumento se da por hecho que sí. Sin
+# terminal para preguntar, se queda en «no» (lo neutro).
+ES_ADOSE="n"
+if [[ -n "$PERFIL" ]]; then ES_ADOSE="s"
+elif : < /dev/tty 2>/dev/null; then
+  r=""
+  while [[ "$r" != [sSnN]* ]]; do
+    read -r -p "  ¿Trabajas en ADOSE (Asociación Dominicana del Sureste)? (s/n) > " r < /dev/tty
+  done
+  [[ "$r" == [sS]* ]] && ES_ADOSE="s"
+fi
+
 # ── 1. Diagnóstico ──────────────────────────────────────────────────────────
 paso "Revisando esta Mac..."
 diagnostico
@@ -157,7 +171,7 @@ if instalar_modelo_whisper; then verde "Modelo de transcripción en $HERR_MODELO
 
 
 paso "6/7  Configuración del equipo"
-aplicar_config "$PWD" "$PERFIL"
+aplicar_config "$PWD" "$PERFIL" "$ES_ADOSE"
 verde "~/.claude listo (lo que había quedó respaldado en ~/.claude/respaldo-*)"
 
 paso "7/7  Plugins y conectores de Claude Code"

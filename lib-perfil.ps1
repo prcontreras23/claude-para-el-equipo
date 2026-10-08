@@ -21,24 +21,34 @@ function Preguntar($texto, $ejemplo) {
 }
 
 function Armar-Perfil {
-  $nombre    = Preguntar "¿Cómo quieres que Claude te llame?" "Pastor Roberto, Noemí, Juan"
-  $cargo     = Preguntar "¿Cuál es tu cargo?" "Pastor distrital, Tesorero, Secretaria, Director de Jóvenes"
-  $oficina   = Preguntar "¿En qué oficina, departamento o distrito trabajas?" "Tesorería, Distrito Los Mina, Ministerio Personal"
-  $tareas    = Preguntar "¿Qué tareas haces más seguido?" "cartas, informes, actas, presupuestos, sermones, planillas de Excel"
+  if ($script:EsAdose) {
+    $ejNom = "Pastor Roberto, Noemí, Juan"; $ejCargo = "Pastor distrital, Tesorero, Secretaria, Director de Jóvenes"
+    $ejOfi = "Tesorería, Distrito Los Mina, Ministerio Personal"; $ejTar = "cartas, informes, actas, presupuestos, sermones, planillas de Excel"
+    $sufijo = " — ADOSE"; $adoseTxt = $true
+  } else {
+    $ejNom = "Ana, Pedro, Doctora Pérez"; $ejCargo = "Contadora, Maestra, Ingeniero, Ama de casa, Estudiante"
+    $ejOfi = "mi negocio, la escuela, la oficina, mi casa"; $ejTar = "cartas, informes, presupuestos, estudiar, planillas de Excel"
+    $sufijo = ""; $adoseTxt = $false
+  }
+  $nombre    = Preguntar "¿Cómo quieres que Claude te llame?" $ejNom
+  $cargo     = Preguntar "¿A qué te dedicas?" $ejCargo
+  $oficina   = Preguntar "¿Dónde trabajas o estudias?" $ejOfi
+  $tareas    = Preguntar "¿Qué tareas haces más seguido?" $ejTar
   $programas = Preguntar "¿Qué programas usas más?" "Outlook, Excel, Word, WhatsApp, Google Drive"
   $estilo = ""
   while ($estilo -ne "1" -and $estilo -ne "2") {
     Write-Host "  ¿Cómo prefieres las respuestas?" -ForegroundColor White
     $estilo = Read-Host "  1 = cortas y al grano | 2 = detalladas, paso a paso >"
   }
+  $intro = if ($adoseTxt) { "Soy $nombre, $cargo en $oficina de la Asociación Dominicana del Sureste (ADOSE), Iglesia Adventista del Séptimo Día, en República Dominicana." } else { "Soy $nombre. Me dedico a: $cargo. Trabajo o estudio en: $oficina." }
   $pref = if ($estilo -eq "1") { "cortas y al grano" } else { "detalladas y paso a paso" }
 
   New-Item -ItemType Directory -Force -Path (Split-Path $script:SobreMi) | Out-Null
   $md = @(
     "# Sobre mí", "",
     "- **Cómo llamarme**: $nombre",
-    "- **Cargo**: $cargo",
-    "- **Oficina, departamento o distrito**: $oficina — ADOSE",
+    "- **A qué me dedico**: $cargo",
+    "- **Dónde**: $oficina$sufijo",
     "- **Tareas más comunes**: $tareas",
     "- **Programas que más uso**: $programas",
     "- **Respuestas**: $pref", "",
@@ -46,5 +56,5 @@ function Armar-Perfil {
   ) -join "`r`n"
   [System.IO.File]::WriteAllText($script:SobreMi, $md, (New-Object System.Text.UTF8Encoding($false)))
 
-  return "Soy $nombre, $cargo en $oficina de la Asociación Dominicana del Sureste (ADOSE), Iglesia Adventista del Séptimo Día, en República Dominicana. Lo que más hago: $tareas. Uso sobre todo $programas. Escríbeme en español, con tildes y en tono profesional y natural, sin palabras rebuscadas. Prefiero respuestas $pref. Si algo no está en mis documentos, dímelo en vez de suponerlo."
+  return "$intro Lo que más hago: $tareas. Uso sobre todo $programas. Escríbeme en español, con tildes y en tono profesional y natural, sin palabras rebuscadas. Prefiero respuestas $pref. Si algo no está en mis documentos, dímelo en vez de suponerlo."
 }

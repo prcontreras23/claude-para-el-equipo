@@ -10,9 +10,15 @@ function Copiar-Capa($capa, $destino, $respaldo) {
     $dest0 = Join-Path $destino $rel
     # Quien ya usaba Claude conserva lo suyo (ver lib-config.sh).
     if ($rel -eq "CLAUDE.md" -and (Test-Path $dest0) -and -not (Select-String -Path $dest0 -Pattern "Claude para el equipo" -SimpleMatch -Quiet)) {
-      Copy-Item $_.FullName (Join-Path $destino "equipo-adose.md") -Force
-      if (-not (Select-String -Path $dest0 -Pattern "@~/.claude/equipo-adose.md" -SimpleMatch -Quiet)) {
-        Add-Content -Path $dest0 -Value "`r`n`r`n## Reglas del equipo de ADOSE`r`n@~/.claude/equipo-adose.md" -Encoding UTF8
+      Copy-Item $_.FullName (Join-Path $destino "equipo-claude.md") -Force
+      # Instalaciones anteriores usaban equipo-adose.md (traia el contexto de ADOSE para todos).
+      if (Select-String -Path $dest0 -Pattern "@~/.claude/equipo-adose.md" -SimpleMatch -Quiet) {
+        $lin = Get-Content -Path $dest0 | Where-Object { $_ -notlike "*@~/.claude/equipo-adose.md*" -and $_ -ne "## Reglas del equipo de ADOSE" }
+        Set-Content -Path $dest0 -Value $lin -Encoding UTF8
+        Remove-Item (Join-Path $destino "equipo-adose.md") -Force -ErrorAction SilentlyContinue
+      }
+      if (-not (Select-String -Path $dest0 -Pattern "@~/.claude/equipo-claude.md" -SimpleMatch -Quiet)) {
+        Add-Content -Path $dest0 -Value "`r`n`r`n## Reglas de Claude para el equipo`r`n@~/.claude/equipo-claude.md" -Encoding UTF8
       }
       return
     }
@@ -29,7 +35,7 @@ function Copiar-Capa($capa, $destino, $respaldo) {
   }
 }
 
-function Aplicar-Config($fuente, $perfil) {
+function Aplicar-Config($fuente, $perfil, $esAdose = $false) {
   $destino  = Join-Path $env:USERPROFILE ".claude"
   $respaldo = Join-Path $destino ("respaldo-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
   New-Item -ItemType Directory -Force -Path $destino | Out-Null
@@ -42,7 +48,23 @@ function Aplicar-Config($fuente, $perfil) {
     else { Write-Host "  ! No existe el perfil '$perfil'; se aplico solo la base." -ForegroundColor Yellow; $perfil = $null }
   }
 
+  # El contexto de ADOSE (quienes somos, SIGA) solo va si la persona es del equipo de ADOSE.
+  $claudeMd = Join-Path $destino "CLAUDE.md"
+  $adoseMd = Join-Path (Join-Path $fuente "equipo-adose") "adose.md"
+  if ($esAdose -and (Test-Path $adoseMd)) {
+    Copy-Item $adoseMd (Join-Path $destino "adose.md") -Force
+    if (-not (Select-String -Path $claudeMd -Pattern "@~/.claude/adose.md" -SimpleMatch -Quiet)) {
+      Add-Content -Path $claudeMd -Value "`r`n`r`n## Contexto de ADOSE`r`n@~/.claude/adose.md" -Encoding UTF8
+    }
+  } else {
+    if ((Test-Path $claudeMd) -and (Select-String -Path $claudeMd -Pattern "@~/.claude/adose.md" -SimpleMatch -Quiet)) {
+      $lin = Get-Content -Path $claudeMd | Where-Object { $_ -notlike "*@~/.claude/adose.md*" -and $_ -ne "## Contexto de ADOSE" }
+      Set-Content -Path $claudeMd -Value $lin -Encoding UTF8
+    }
+    Remove-Item (Join-Path $destino "adose.md") -Force -ErrorAction SilentlyContinue
+  }
+
   $nombre = if ($perfil) { $perfil } else { "base" }
-  @("repo: $Repo", "perfil: $nombre", "fecha: $(Get-Date -Format 'yyyy-MM-dd HH:mm')") |
+  @("repo: $Repo", "perfil: $nombre", "adose: $(if ($esAdose) { 's' } else { 'n' })", "fecha: $(Get-Date -Format 'yyyy-MM-dd HH:mm')") |
     Set-Content -Path (Join-Path $destino ".claude-para-el-equipo") -Encoding UTF8
 }

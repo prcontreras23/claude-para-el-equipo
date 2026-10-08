@@ -21,11 +21,24 @@ preguntar() {  # preguntar "texto" "ejemplo" → respuesta en $R
 }
 
 armar_perfil() {
-  preguntar "¿Cómo quieres que Claude te llame?" "Pastor Roberto, Noemí, Juan"; local nombre="$R"
-  preguntar "¿Cuál es tu cargo?" "Pastor distrital, Tesorero, Secretaria, Director de Jóvenes"; local cargo="$R"
-  preguntar "¿En qué oficina, departamento o distrito trabajas?" "Tesorería, Distrito Los Mina, Ministerio Personal"; local oficina="$R"
-  preguntar "¿Qué tareas haces más seguido?" "cartas, informes, actas, presupuestos, sermones, planillas de Excel"; local tareas="$R"
+  local ej_nom ej_cargo ej_ofi ej_tar
+  if [[ "${ES_ADOSE:-n}" == "s" ]]; then
+    ej_nom="Pastor Roberto, Noemí, Juan"; ej_cargo="Pastor distrital, Tesorero, Secretaria, Director de Jóvenes"
+    ej_ofi="Tesorería, Distrito Los Mina, Ministerio Personal"; ej_tar="cartas, informes, actas, presupuestos, sermones, planillas de Excel"
+  else
+    ej_nom="Ana, Pedro, Doctora Pérez"; ej_cargo="Contadora, Maestra, Ingeniero, Ama de casa, Estudiante"
+    ej_ofi="mi negocio, la escuela, la oficina, mi casa"; ej_tar="cartas, informes, presupuestos, estudiar, planillas de Excel"
+  fi
+  preguntar "¿Cómo quieres que Claude te llame?" "$ej_nom"; local nombre="$R"
+  preguntar "¿A qué te dedicas?" "$ej_cargo"; local cargo="$R"
+  preguntar "¿Dónde trabajas o estudias?" "$ej_ofi"; local oficina="$R"
+  preguntar "¿Qué tareas haces más seguido?" "$ej_tar"; local tareas="$R"
   preguntar "¿Qué programas usas más?" "Outlook, Excel, Word, WhatsApp, Google Drive"; local programas="$R"
+  local sufijo="" intro="Soy $nombre. Me dedico a: $cargo. Trabajo o estudio en: $oficina."
+  if [[ "${ES_ADOSE:-n}" == "s" ]]; then
+    sufijo=" — ADOSE"
+    intro="Soy $nombre, $cargo en $oficina de la Asociación Dominicana del Sureste (ADOSE), Iglesia Adventista del Séptimo Día, en República Dominicana."
+  fi
   local estilo=""
   while [[ "$estilo" != "1" && "$estilo" != "2" ]]; do
     printf '\033[1m  ¿Cómo prefieres las respuestas?\033[0m\n'
@@ -38,8 +51,8 @@ armar_perfil() {
 # Sobre mí
 
 - **Cómo llamarme**: $nombre
-- **Cargo**: $cargo
-- **Oficina, departamento o distrito**: $oficina — ADOSE
+- **A qué me dedico**: $cargo
+- **Dónde**: $oficina$sufijo
 - **Tareas más comunes**: $tareas
 - **Programas que más uso**: $programas
 - **Respuestas**: $pref
@@ -47,5 +60,5 @@ armar_perfil() {
 Puedo editar este archivo cuando cambie algo. El instalador no lo vuelve a tocar.
 FIN
 
-  PERFIL_TEXTO="Soy $nombre, $cargo en $oficina de la Asociación Dominicana del Sureste (ADOSE), Iglesia Adventista del Séptimo Día, en República Dominicana. Lo que más hago: $tareas. Uso sobre todo $programas. Escríbeme en español, con tildes y en tono profesional y natural, sin palabras rebuscadas. Prefiero respuestas $pref. Si algo no está en mis documentos, dímelo en vez de suponerlo."
+  PERFIL_TEXTO="$intro Lo que más hago: $tareas. Uso sobre todo $programas. Escríbeme en español, con tildes y en tono profesional y natural, sin palabras rebuscadas. Prefiero respuestas $pref. Si algo no está en mis documentos, dímelo en vez de suponerlo."
 }

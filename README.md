@@ -112,7 +112,8 @@ Se puede volver a correr las veces que haga falta: lo instalado se detecta y se 
 
 ## Qué trae la configuración base (`config/`)
 
-- `CLAUDE.md` — contexto de ADOSE, idioma y tono, reglas de credenciales y de fuentes oficiales. Aplica en todas las carpetas.
+- `CLAUDE.md` — idioma y tono, reglas de credenciales y la lista de herramientas instaladas. Aplica en todas las carpetas y **no menciona ADOSE**.
+- `equipo-adose/adose.md` — quiénes somos y la fuente oficial (SGA). **Solo se instala si la persona contesta que trabaja en ADOSE** (el instalador lo pregunta al inicio; con un perfil como argumento se da por hecho que sí). Quien no es de ADOSE no recibe nada de eso, ni en `~/.claude` ni en su perfil de claude.ai.
 - `settings.json` — tema oscuro, aviso cuando Claude necesita algo, búsqueda web permitida.
 
 Lo que **no** trae, a propósito: conectores (Gmail, Outlook, Notion, Drive…), que vienen con la cuenta de claude.ai y se activan desde ahí; y el WhatsApp, que tiene su propio instalador en [whatsapp-para-claude](https://github.com/prcontreras23/whatsapp-para-claude).

@@ -10,7 +10,7 @@
 #    la persona ya tenga.
 
 aplicar_config() {
-  local fuente="$1" perfil="${2:-}"
+  local fuente="$1" perfil="${2:-}" es_adose="${3:-n}"
   local destino="$HOME/.claude"
   local respaldo="$destino/respaldo-$(date +%Y%m%d-%H%M%S)"
   mkdir -p "$destino"
@@ -26,10 +26,24 @@ aplicar_config() {
     fi
   fi
 
+  # El contexto de ADOSE (quiénes somos, SIGA) solo va si la persona es del equipo de ADOSE.
+  if [[ "$es_adose" == "s" && -f "$fuente/equipo-adose/adose.md" ]]; then
+    cp -p "$fuente/equipo-adose/adose.md" "$destino/adose.md"
+    grep -qF "@~/.claude/adose.md" "$destino/CLAUDE.md" \
+      || printf '\n\n## Contexto de ADOSE\n@~/.claude/adose.md\n' >> "$destino/CLAUDE.md"
+  else
+    # Si una corrida anterior lo había puesto, se quita.
+    if [[ -f "$destino/CLAUDE.md" ]] && grep -qF "@~/.claude/adose.md" "$destino/CLAUDE.md"; then
+      grep -vF -e "@~/.claude/adose.md" -e "## Contexto de ADOSE" "$destino/CLAUDE.md" > "$destino/CLAUDE.md.nuevo" && mv "$destino/CLAUDE.md.nuevo" "$destino/CLAUDE.md"
+    fi
+    rm -f "$destino/adose.md"
+  fi
+
   # Marcar de dónde salió, para saber qué versión tiene cada máquina.
   {
     echo "repo: $REPO"
     echo "perfil: ${perfil:-base}"
+    echo "adose: $es_adose"
     echo "fecha: $(date '+%Y-%m-%d %H:%M')"
   } > "$destino/.claude-para-el-equipo"
 }
@@ -42,12 +56,17 @@ _copiar_capa() {
     rel="${f#"$capa"/}"
     [[ "$rel" == README.md ]] && continue
     # Quien ya usaba Claude conserva lo suyo:
-    #  - su CLAUDE.md no se reemplaza; el del equipo va a equipo-adose.md y se importa al final.
+    #  - su CLAUDE.md no se reemplaza; el del equipo va a equipo-claude.md y se importa al final.
     #  - su settings.json no se toca; los plugins escriben ahí lo que necesitan.
     if [[ "$rel" == CLAUDE.md && -f "$destino/CLAUDE.md" ]] && ! grep -qF "Claude para el equipo" "$destino/CLAUDE.md"; then
-      cp -p "$f" "$destino/equipo-adose.md"
-      grep -qF "@~/.claude/equipo-adose.md" "$destino/CLAUDE.md" \
-        || printf '\n\n## Reglas del equipo de ADOSE\n@~/.claude/equipo-adose.md\n' >> "$destino/CLAUDE.md"
+      cp -p "$f" "$destino/equipo-claude.md"
+      # Instalaciones anteriores usaban equipo-adose.md (traía el contexto de ADOSE para todos).
+      if grep -qF "@~/.claude/equipo-adose.md" "$destino/CLAUDE.md"; then
+        grep -vF -e "@~/.claude/equipo-adose.md" -e "## Reglas del equipo de ADOSE" "$destino/CLAUDE.md" > "$destino/CLAUDE.md.nuevo" && mv "$destino/CLAUDE.md.nuevo" "$destino/CLAUDE.md"
+        rm -f "$destino/equipo-adose.md"
+      fi
+      grep -qF "@~/.claude/equipo-claude.md" "$destino/CLAUDE.md" \
+        || printf '\n\n## Reglas de Claude para el equipo\n@~/.claude/equipo-claude.md\n' >> "$destino/CLAUDE.md"
       continue
     fi
     [[ "$rel" == settings.json && -f "$destino/settings.json" ]] && continue

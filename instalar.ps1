@@ -80,6 +80,16 @@ try { Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$Repo/main/READM
 catch { Rojo "No hay internet. Conéctate e inténtalo otra vez."; exit 1 }
 
 # -- 1. Diagnóstico ------------------------------------------------------------
+# El contexto de ADOSE (quienes somos, SIGA) y los ejemplos del perfil solo van si la
+# persona trabaja alli. Con un perfil como argumento se da por hecho que si.
+$script:EsAdose = $false
+if ($Perfil) { $script:EsAdose = $true }
+else {
+  $r = ""
+  while ($r -notmatch '^[sSnN]') { $r = Read-Host "  ¿Trabajas en ADOSE (Asociación Dominicana del Sureste)? (s/n) >" }
+  $script:EsAdose = ($r -match '^[sS]')
+}
+
 Paso "Revisando esta computadora..."
 Diagnostico
 
@@ -121,7 +131,7 @@ if (Instalar-ModeloWhisper) { Verde "Modelo de transcripción en $script:Modelo"
 Persistir-RutasHerramientas
 
 Paso "6/7  Configuración del equipo"
-Aplicar-Config $PSScriptRoot $Perfil
+Aplicar-Config $PSScriptRoot $Perfil $script:EsAdose
 Verde "$env:USERPROFILE\.claude listo (si ya tenías tu propia configuración, se respetó)"
 
 Paso "7/7  Plugins y conectores de Claude Code"
