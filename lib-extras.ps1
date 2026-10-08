@@ -25,7 +25,10 @@ function Paso-Celular {
   Gris "por voz y le mandas fotos de documentos. Es la misma cuenta y las mismas conversaciones."
   if (Ya-Hecho "¿Ya tienes la app de Claude en tu celular?") { Verde "App del celular"; return }
   $t = ""
-  while ($t -ne "1" -and $t -ne "2") { $t = Read-Host "  ¿Tu celular es 1 = iPhone o 2 = Android? >" }
+  while ($t -ne "1" -and $t -ne "2") {
+    $t = Read-Host "  ¿Tu celular es 1 = iPhone o 2 = Android? (Enter = saltar) >"
+    if (-not $t) { Gris "Se salta."; return }
+  }
   $url = if ($t -eq "1") { $script:AppIphone } else { $script:AppAndroid }
   Write-Host ""
   Gris "Abre la cámara del celular y apunta a este código:"

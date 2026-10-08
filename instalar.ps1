@@ -130,16 +130,20 @@ Gris "finance, data, marketing y pdf-viewer"
 if (Instalar-Plugins) { Verde "Plugins instalados y activos" } else { Rojo ("No quedaron: " + ((Plugins-Faltan) -join ", ")) }
 if (Instalar-FastTrack) { Verde "FastTrack (búsqueda de literatura académica)" } else { Rojo "No se pudo agregar FastTrack." }
 
-# -- 3. Pasos que hace la persona. No se sigue hasta que cada uno quede hecho. -
+# -- 3. Pasos guiados. NINGUNO es obligatorio: cada uno pregunta y se puede saltar. -
 $script:Total = 10
 $script:N = 0
-function Siguiente($titulo) { $script:N++; Paso ("Paso " + $script:N + " de " + $script:Total + " — " + $titulo) }
+# Nada es obligatorio: cada paso pregunta si se hace ahora (Enter = si, n = saltar).
+# Los de WhatsApp y Obsidian ya traen su propia pregunta, asi que no se duplica.
+function Quiere($pregunta) { $r = Read-Host "  $pregunta (Enter = sí, n = saltar) >"; return ($r -notmatch '^[nN]') }
+function Siguiente($titulo) { $script:N++; Paso ("Paso " + $script:N + " de " + $script:Total + " — " + $titulo); return (Quiere "¿Lo haces ahora? Es opcional") }
+function Siguiente-Libre($titulo) { $script:N++; Paso ("Paso " + $script:N + " de " + $script:Total + " — " + $titulo) }
 
 Write-Host ""
 Negrita "Lo automático terminó. Ahora te guío en $script:Total pasos cortos."
-Gris "En cada uno se abre lo que haga falta y el instalador espera a que termines."
+Gris "Todos son opcionales: Enter para hacerlo, n para saltarlo."
 
-Siguiente "Entrar a Claude en internet"
+if (Siguiente "Entrar a Claude en internet") {
 if (Ya-Hecho "¿Ya entraste antes a claude.ai con tu correo del equipo?") { Verde "claude.ai" }
 else {
   Gris "Se abre claude.ai. Escribe el correo con el que te invitaron; Claude te manda"
@@ -148,8 +152,9 @@ else {
   Esperar "Cuando ya estés dentro de claude.ai, presiona Enter..."
   Verde "claude.ai"
 }
+} else { Gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador." }
 
-Siguiente "Conectar tu correo, calendario y archivos"
+if (Siguiente "Conectar tu correo, calendario y archivos") {
 Gris "Así Claude puede leer tus correos, ver tu agenda y buscar en tus documentos cuando"
 Gris "se lo pidas. Sirve en claude.ai, Claude Desktop, Cowork y Claude Code."
 if (Ya-Hecho "¿Ya conectaste tu correo y tu calendario en claude.ai?") { Verde "Conectores" }
@@ -164,8 +169,9 @@ else {
   Esperar "Cuando hayas conectado los que usas, presiona Enter..."
   Verde "Conectores"
 }
+} else { Gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador." }
 
-Siguiente "Tu perfil: que Claude sepa quién eres"
+if (Siguiente "Tu perfil: que Claude sepa quién eres") {
 Gris "Claude trabaja mucho mejor cuando sabe tu cargo, tu oficina y lo que haces cada día:"
 Gris "las cartas le salen con tu cargo, los informes con tu oficina, y no tienes que"
 Gris "explicarle lo mismo en cada conversación. Son seis preguntas cortas."
@@ -187,49 +193,59 @@ if ($rehacer) {
   Esperar "Cuando lo hayas guardado, presiona Enter..."
 }
 Verde "Perfil"
+} else { Gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador." }
 
-Siguiente "Claude Desktop (Chat, Cowork y Code)"
+if (Siguiente "Claude Desktop (Chat, Cowork y Code)") {
 while (-not (Tiene-ClaudeDesktop)) {
   Rojo "Claude Desktop no está instalada."
+  if (-not (Quiere "¿Seguimos con la descarga?")) { break }
   Gris "Se abre la página de descarga: bájala, abre el archivo y sigue el instalador."
   Abrir-Web "https://claude.ai/download"
   Esperar "Cuando termine de instalarse, presiona Enter..."
 }
 $desktop = Ruta-ClaudeDesktop
-if ($desktop) { Start-Process $desktop } else { Gris "Abre Claude desde el menú Inicio (escribe Claude)." }
-if (Ya-Hecho "Se abrió Claude Desktop. ¿Ya estaba con tu cuenta adentro?") { Verde "Claude Desktop" }
+if ($desktop) { Start-Process $desktop } elseif (Tiene-ClaudeDesktop) { Gris "Abre Claude desde el menú Inicio (escribe Claude)." }
+if (-not (Tiene-ClaudeDesktop)) { Gris "Claude Desktop queda pendiente." }
+elseif (Ya-Hecho "Se abrió Claude Desktop. ¿Ya estaba con tu cuenta adentro?") { Verde "Claude Desktop" }
 else {
   Gris "Entra con el mismo correo (te llega otro código). Arriba verás Chat, Cowork y Code."
   Esperar "Cuando estés dentro de Claude Desktop, presiona Enter..."
   Verde "Claude Desktop"
 }
+} else { Gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador." }
 
-Siguiente "Extensión de Claude en Chrome"
+if (Siguiente "Extensión de Claude en Chrome") {
 Gris "Con la extensión, Claude puede ayudarte dentro de cualquier página web."
 while (-not (Tiene-Chrome)) {
   Rojo "Google Chrome no está instalado, y la extensión solo funciona en Chrome."
+  if (-not (Quiere "¿Seguimos con Chrome?")) { break }
   Gris "Se abre la página de Chrome: bájalo y sigue el instalador."
   Start-Process "https://www.google.com/chrome/"
   Esperar "Cuando Chrome esté instalado, presiona Enter..."
 }
-if ((Tiene-ExtChrome) -and (Ya-Hecho "La extensión ya está en Chrome. ¿Ya entraste en ella con tu cuenta?")) { Verde "Extensión de Chrome" }
+if (-not (Tiene-Chrome)) { Gris "Sin Chrome no se puede añadir la extensión; queda pendiente." }
+elseif ((Tiene-ExtChrome) -and (Ya-Hecho "La extensión ya está en Chrome. ¿Ya entraste en ella con tu cuenta?")) { Verde "Extensión de Chrome" }
 else {
   while (-not (Tiene-ExtChrome)) {
     Gris "Se abre la extensión en Chrome. Dale a «Añadir a Chrome» y luego a «Añadir extensión»."
     Start-Process (Ruta-Chrome) $script:ChromeExtUrl
     Esperar "Cuando la hayas añadido, presiona Enter..."
-    if (-not (Tiene-ExtChrome)) { Rojo "Todavía no aparece la extensión en Chrome." }
+    if (-not (Tiene-ExtChrome)) { Rojo "Todavía no aparece la extensión en Chrome."; if (-not (Quiere "¿Lo intentas otra vez?")) { break } }
   }
+  if (Tiene-ExtChrome) {
   Gris "Haz clic en el ícono de Claude arriba a la derecha en Chrome (si no se ve, está"
   Gris "en la pieza de rompecabezas) y entra con tu cuenta."
   Esperar "Cuando hayas entrado en la extensión, presiona Enter..."
   Verde "Extensión de Chrome"
+  }
 }
+} else { Gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador." }
 
-Siguiente "Claude en tu celular"
+if (Siguiente "Claude en tu celular") {
 Paso-Celular
+} else { Gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador." }
 
-Siguiente "Claude en Word, Excel y PowerPoint"
+if (Siguiente "Claude en Word, Excel y PowerPoint") {
 if (-not (Tiene-OfficeAlguna)) { Gris "Esta computadora no tiene Word, Excel ni PowerPoint. Se salta este paso." }
 foreach ($app in $script:OfficeApps.Keys) {
   if (-not (Tiene-OfficeApp $app)) { continue }
@@ -246,18 +262,19 @@ foreach ($app in $script:OfficeApps.Keys) {
   }
   if (Tiene-ClaudeOffice $app) { Verde "Claude en $app" }
 }
+} else { Gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador." }
 
-Siguiente "WhatsApp (opcional)"
+Siguiente-Libre "WhatsApp (opcional)"
 Paso-WhatsApp
 
-Siguiente "Tu segundo cerebro en Obsidian (opcional)"
+Siguiente-Libre "Tu segundo cerebro en Obsidian (opcional)"
 Paso-SegundoCerebro $PSScriptRoot
 
 # -- 4. Diagnóstico final y Claude Code ----------------------------------------
 Paso "Cómo quedó esta computadora"
 Diagnostico
 
-Siguiente "Claude Code"
+if (Siguiente "Claude Code") {
 Ruta-Herramientas
 $intentos = 0
 while (-not (Sesion-ClaudeCodeActiva) -and $intentos -lt 3) {
@@ -269,6 +286,7 @@ while (-not (Sesion-ClaudeCodeActiva) -and $intentos -lt 3) {
 if (Sesion-ClaudeCodeActiva) { Verde "Claude Code con tu cuenta" }
 
 Write-Host ""
+} else { Gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador." }
 Negrita "Todo listo."
 Gris "Para trabajar, abre Claude Desktop: ahí tienes Chat, Cowork y Code."
 if (Tiene-SegundoCerebro) { Gris "Tu segundo cerebro está en Obsidian; empieza por la nota «Inicio»." }

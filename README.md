@@ -72,7 +72,7 @@ En Mac el doble clic en `Instalar en Mac.command` **no funciona si el archivo se
 
 **3. Plugins y conectores de Claude Code**, solos: `document-skills` y los de oficina de Anthropic (`productivity`, `enterprise-search`, `operations`, `human-resources`, `finance`, `data`, `marketing`, `pdf-viewer`), y el conector de FastTrack.
 
-**4. Diez pasos guiados.** Los que ya están hechos se detectan o se preguntan («¿Ya lo tienes?») y se saltan:
+**4. Diez pasos guiados, todos opcionales.** Cada uno pregunta si se hace ahora (Enter = sí, `n` = saltar); nada obliga a entrar a claude.ai, instalar la extensión de Chrome, los complementos de Office, WhatsApp, Obsidian ni Claude Code. Lo que se salta se retoma volviendo a pegar la misma línea. Los que ya están hechos se detectan o se preguntan («¿Ya lo tienes?») y se saltan:
 
 | Paso | Qué hace |
 |---|---|
@@ -80,9 +80,9 @@ En Mac el doble clic en `Instalar en Mac.command` **no funciona si el archivo se
 | 2. Conectores | Abre `claude.ai/customize/connectors` (Personalización → Conectores) para conectar Microsoft 365 (Outlook, calendario, OneDrive, Teams), Gmail, Google Calendar, Google Drive y FastTrack |
 | 3. Perfil | Seis preguntas (nombre, cargo, oficina, tareas, programas, estilo). Guarda `~/.claude/sobre-mi.md` y copia al portapapeles el texto para «Instrucciones para Claude» (claude.ai → Configuración → Cuenta) |
 | 4. Claude Desktop | Comprueba que esté instalada, la abre y espera a que la persona entre |
-| 5. Extensión de Chrome | No sigue hasta detectarla instalada |
+| 5. Extensión de Chrome | Abre la extensión y espera a detectarla; si la persona no quiere seguir, queda pendiente |
 | 6. App del celular | iPhone o Android, con código QR en la Terminal |
-| 7. Claude en Word, Excel y PowerPoint | Complementos de AppSource, verificados en la caché de Office |
+| 7. Claude en Word, Excel y PowerPoint | Complementos de AppSource, verificados en la caché de Office (hasta 3 intentos por programa) |
 | 8. WhatsApp (opcional) | Aviso de privacidad y, si la persona quiere, corre [whatsapp-para-claude](https://github.com/prcontreras23/whatsapp-para-claude) |
 | 9. Segundo cerebro (opcional) | Instala Obsidian, pregunta dónde crearlo (iCloud, OneDrive, Documentos u otra carpeta) y cuatro preguntas más; arma una bóveda con el patrón *LLM Wiki* de Karpathy (`fuentes/`, `wiki/`, `CLAUDE.md` como esquema) y la registra en Obsidian |
 | 10. Claude Code | Diagnóstico final, `claude auth login` hasta que quede la sesión, y abre `claude` |

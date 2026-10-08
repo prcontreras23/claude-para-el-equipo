@@ -30,7 +30,8 @@ paso_celular() {
   if ya_hecho "¿Ya tienes la app de Claude en tu celular?"; then verde "App del celular"; return; fi
   local t=""
   while [[ "$t" != "1" && "$t" != "2" ]]; do
-    read -r -p "  ¿Tu celular es 1 = iPhone o 2 = Android? > " t < /dev/tty
+    read -r -p "  ¿Tu celular es 1 = iPhone o 2 = Android? (Enter = saltar) > " t < /dev/tty
+    [[ -z "$t" ]] && { gris "Se salta."; return; }
   done
   local url="$APP_IPHONE"; [[ "$t" == "2" ]] && url="$APP_ANDROID"
   echo

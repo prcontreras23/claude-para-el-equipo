@@ -5,8 +5,9 @@
 #      Google Chrome, las herramientas para PDF, Word, Excel, PowerPoint,
 #      imágenes, OCR y transcripción de audio (ver lib-herramientas.sh), y la
 #      configuración del equipo en ~/.claude.
-#   3. Pasos que hace la persona, sin saltarse ninguno: entrar en claude.ai,
-#      entrar en Claude Desktop, añadir la extensión de Claude a Chrome y entrar.
+#   3. Pasos guiados: entrar en claude.ai, conectores, perfil, Claude Desktop,
+#      extensión de Chrome, celular, Office, WhatsApp, Obsidian y Claude Code.
+#      NINGUNO es obligatorio: cada uno pregunta y se puede saltar.
 #   4. Diagnóstico final y abre Claude Code para entrar con la cuenta.
 # Acepta un perfil como primer argumento.
 #
@@ -175,13 +176,18 @@ fi
 
 TOTAL=10
 n=0
-siguiente() { n=$((n + 1)); paso "Paso $n de $TOTAL — $1"; }
+# Nada es obligatorio: cada paso pregunta si se hace ahora (Enter = sí, n = saltar).
+# Los de WhatsApp y Obsidian ya traen su propia pregunta, así que no se duplica.
+quiere_seguir() { local r; read -r -p "  $1 (Enter = sí, n = dejarlo para después) > " r < /dev/tty; [[ "$r" != [nN]* ]]; }
+quiere() { local r; read -r -p "  ¿Lo haces ahora? Es opcional (Enter = sí, n = saltar) > " r < /dev/tty; [[ "$r" != [nN]* ]]; }
+siguiente()       { n=$((n + 1)); paso "Paso $n de $TOTAL — $1"; quiere; }
+siguiente_libre() { n=$((n + 1)); paso "Paso $n de $TOTAL — $1"; }
 
 echo
 negrita "Lo automático terminó. Ahora te guío en $TOTAL pasos cortos."
 gris "En cada uno se abre lo que haga falta y el instalador espera a que termines."
 
-siguiente "Entrar a Claude en internet"
+if siguiente "Entrar a Claude en internet"; then
 if ya_hecho "¿Ya entraste antes a claude.ai con tu correo del equipo?"; then verde "claude.ai"
 else
   gris "Se abre claude.ai. Escribe el correo con el que te invitaron; Claude te manda"
@@ -190,8 +196,10 @@ else
   esperar "Cuando ya estés dentro de claude.ai, presiona Enter..."
   verde "claude.ai"
 fi
+else gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador."
+fi
 
-siguiente "Conectar tu correo, calendario y archivos"
+if siguiente "Conectar tu correo, calendario y archivos"; then
 gris "Así Claude puede leer tus correos, ver tu agenda y buscar en tus documentos cuando"
 gris "se lo pidas. Sirve en claude.ai, Claude Desktop, Cowork y Claude Code."
 if ya_hecho "¿Ya conectaste tu correo y tu calendario en claude.ai?"; then verde "Conectores"
@@ -206,8 +214,10 @@ else
   esperar "Cuando hayas conectado los que usas, presiona Enter..."
   verde "Conectores"
 fi
+else gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador."
+fi
 
-siguiente "Tu perfil: que Claude sepa quién eres"
+if siguiente "Tu perfil: que Claude sepa quién eres"; then
 gris "Claude trabaja mucho mejor cuando sabe tu cargo, tu oficina y lo que haces cada día:"
 gris "las cartas le salen con tu cargo, los informes con tu oficina, y no tienes que"
 gris "explicarle lo mismo en cada conversación. Son seis preguntas cortas."
@@ -232,48 +242,62 @@ if [[ "$rehacer" == "s" ]]; then
   esperar "Cuando lo hayas guardado, presiona Enter..."
 fi
 verde "Perfil"
+else gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador."
+fi
 
-siguiente "Claude Desktop (Chat, Cowork y Code)"
+if siguiente "Claude Desktop (Chat, Cowork y Code)"; then
 while ! tiene_claude_desktop; do
   rojo "Claude Desktop no está en Aplicaciones."
+  quiere_seguir "¿Seguimos con la descarga?" || break
   gris "Se abre la página de descarga: bájala, abre el archivo y arrastra Claude a Aplicaciones."
   abrir_web "https://claude.ai/download"
   esperar "Cuando esté en Aplicaciones, presiona Enter..."
 done
-open -a Claude
-if ya_hecho "Se abrió Claude Desktop. ¿Ya estaba con tu cuenta adentro?"; then verde "Claude Desktop"
+if tiene_claude_desktop; then open -a Claude; fi
+if ! tiene_claude_desktop; then gris "Claude Desktop queda pendiente."
+elif ya_hecho "Se abrió Claude Desktop. ¿Ya estaba con tu cuenta adentro?"; then verde "Claude Desktop"
 else
   gris "Entra con el mismo correo (te llega otro código). Arriba verás Chat, Cowork y Code."
   esperar "Cuando estés dentro de Claude Desktop, presiona Enter..."
   verde "Claude Desktop"
 fi
+else gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador."
+fi
 
-siguiente "Extensión de Claude en Chrome"
+if siguiente "Extensión de Claude en Chrome"; then
 gris "Con la extensión, Claude puede ayudarte dentro de cualquier página web."
 while ! tiene_chrome; do
   rojo "Google Chrome no está instalado, y la extensión solo funciona en Chrome."
+  quiere_seguir "¿Seguimos con Chrome?" || break
   gris "Se abre la página de Chrome: bájalo, abre el archivo y arrastra Chrome a Aplicaciones."
   open "https://www.google.com/chrome/"
   esperar "Cuando Chrome esté en Aplicaciones, presiona Enter..."
 done
-if tiene_ext_chrome && ya_hecho "La extensión ya está en Chrome. ¿Ya entraste en ella con tu cuenta?"; then verde "Extensión de Chrome"
+if ! tiene_chrome; then gris "Sin Chrome no se puede añadir la extensión; queda pendiente."
+elif tiene_ext_chrome && ya_hecho "La extensión ya está en Chrome. ¿Ya entraste en ella con tu cuenta?"; then verde "Extensión de Chrome"
 else
   while ! tiene_ext_chrome; do
     gris "Se abre la extensión en Chrome. Dale a «Añadir a Chrome» y luego a «Añadir extensión»."
     open -a "Google Chrome" "$CHROME_EXT_URL"
     esperar "Cuando la hayas añadido, presiona Enter..."
-    tiene_ext_chrome || rojo "Todavía no aparece la extensión en Chrome."
+    tiene_ext_chrome || { rojo "Todavía no aparece la extensión en Chrome."; quiere_seguir "¿Lo intentas otra vez?" || break; }
   done
+  if tiene_ext_chrome; then
   gris "Haz clic en el ícono de Claude arriba a la derecha en Chrome (si no se ve, está"
   gris "en la pieza de rompecabezas) y entra con tu cuenta."
   esperar "Cuando hayas entrado en la extensión, presiona Enter..."
   verde "Extensión de Chrome"
+  fi
+fi
+else gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador."
 fi
 
-siguiente "Claude en tu celular"
+if siguiente "Claude en tu celular"; then
 paso_celular
+else gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador."
+fi
 
-siguiente "Claude en Word, Excel y PowerPoint"
+if siguiente "Claude en Word, Excel y PowerPoint"; then
 if ! tiene_office_alguna; then
   gris "Esta Mac no tiene Word, Excel ni PowerPoint. Se salta este paso."
 fi
@@ -296,18 +320,20 @@ for app in Word Excel Powerpoint; do
   done
   tiene_claude_office "$app" && verde "Claude en $nombre"
 done
+else gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador."
+fi
 
-siguiente "WhatsApp (opcional)"
+siguiente_libre "WhatsApp (opcional)"
 paso_whatsapp
 
-siguiente "Tu segundo cerebro en Obsidian (opcional)"
+siguiente_libre "Tu segundo cerebro en Obsidian (opcional)"
 paso_segundo_cerebro
 
 # ── 4. Diagnóstico final y Claude Code ──────────────────────────────────────
 paso "Cómo quedó esta Mac"
 diagnostico
 
-siguiente "Claude Code"
+if siguiente "Claude Code"; then
 ruta_extendida
 intentos=0
 while ! sesion_claude_code_activa && (( intentos < 3 )); do
@@ -317,6 +343,8 @@ while ! sesion_claude_code_activa && (( intentos < 3 )); do
   sesion_claude_code_activa || rojo "Claude Code todavía no tiene tu cuenta."
 done
 sesion_claude_code_activa && verde "Claude Code con tu cuenta"
+else gris "Se salta. Lo puedes hacer después volviendo a pegar la misma línea del instalador."
+fi
 
 echo
 negrita "Todo listo."
