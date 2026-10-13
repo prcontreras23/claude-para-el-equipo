@@ -78,8 +78,16 @@ instalar_libreoffice() {
 
 # ------------------------------------------------------------------ OCR en español
 
-tessdata_dir() { echo "$(brew --prefix 2>/dev/null)/share/tessdata"; }
-tiene_ocr_es()  { [[ -s "$(tessdata_dir)/spa.traineddata" ]]; }
+# Donde queda el español según cómo se instaló tesseract: Homebrew (Apple Silicon o
+# Intel) o MacPorts (Intel).
+tessdata_dirs() {
+  local p; p="$(brew --prefix 2>/dev/null)"; [[ -n "$p" ]] && echo "$p/share/tessdata"
+  echo /opt/homebrew/share/tessdata; echo /usr/local/share/tessdata; echo /opt/local/share/tessdata
+}
+tessdata_dir() { local d; for d in $(tessdata_dirs); do [[ -d "$d" ]] && { echo "$d"; return; }; done; }
+tiene_ocr_es() {
+  local d; for d in $(tessdata_dirs); do [[ -s "$d/spa.traineddata" ]] && return 0; done; return 1
+}
 
 instalar_ocr_es() {
   tiene_ocr_es && return 0

@@ -7,9 +7,15 @@
 
 ruta_extendida() {
   local d
-  for d in "$HOME/.local/bin" "/opt/homebrew/bin" "/usr/local/bin"; do
+  # /opt/local es MacPorts (Mac Intel sin Homebrew); /usr/local/bin también recibe
+  # lo de los .pkg de pandoc y Node.
+  for d in "$HOME/.local/bin" "/opt/local/sbin" "/opt/local/bin" "/opt/homebrew/bin" "/usr/local/bin"; do
     [[ -d "$d" && ":$PATH:" != *":$d:"* ]] && PATH="$d:$PATH"
   done
+  # El Python de documentos (y el yt-dlp que en Intel se instala ahí) va al final:
+  # solo para que la revisión lo encuentre, sin cambiar qué python3 se usa.
+  d="$HOME/.local/share/claude-equipo/python/bin"
+  [[ -d "$d" && ":$PATH:" != *":$d:"* ]] && PATH="$PATH:$d"
   export PATH
 }
 

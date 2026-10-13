@@ -22,6 +22,7 @@ PERFIL="${1:-${PERFIL:-}}"
 source ./lib-requisitos.sh
 source ./lib-config.sh
 source ./lib-herramientas.sh
+source ./lib-intel.sh
 source ./lib-perfil.sh
 source ./lib-extras.sh
 
@@ -55,7 +56,8 @@ diagnostico() {
   fila "Claude Desktop (con Cowork)"   tiene_claude_desktop
   fila "Google Chrome"                 tiene_chrome
   fila "Extensión de Claude en Chrome" tiene_ext_chrome
-  fila "Homebrew"                      tiene_brew
+  if usar_macports; then fila "MacPorts (Mac Intel)"   tiene_macports
+  else fila "Homebrew"                      tiene_brew; fi
   fila "PDF (poppler, qpdf)"           tiene_pdf_tools
   fila "OCR en español (tesseract)"    tiene_ocr
   fila "Word/Excel/PPT (LibreOffice, pandoc)" tiene_conversion
@@ -138,7 +140,14 @@ esac
 [[ $r -ne 0 ]] && gris "Más abajo se abre la página para bajarlo a mano."
 
 paso "5/7  Herramientas para documentos, imágenes, OCR y audio"
-if tiene_brew; then
+# Mac Intel sin Homebrew: el instalador oficial de Homebrew ya no funciona ahí
+# («only supported on Apple Silicon»), así que se va por MacPorts y los .pkg/.dmg
+# oficiales (ver lib-intel.sh). Con un Homebrew que ya funcione, se sigue usando.
+if usar_macports; then
+  gris "Esta Mac tiene procesador Intel: se instala con MacPorts y los instaladores oficiales, sin Homebrew."
+  gris "Te va a pedir la contraseña con la que entras a esta Mac. Mientras la escribes no se ven los caracteres."
+  herramientas_intel "$real_tty"
+elif tiene_brew; then
   verde "Homebrew"
 elif [[ -n "$real_tty" ]]; then
   gris "Hace falta Homebrew (el instalador de programas de la Mac)."
@@ -149,7 +158,9 @@ else
   rojo "Falta Homebrew y hace falta la Terminal para instalarlo (pide contraseña)."
 fi
 
-if tiene_brew; then
+if usar_macports; then
+  :
+elif tiene_brew; then
   gris "Programas (esto puede tardar 10–20 minutos la primera vez)..."
   if instalar_formulas; then verde "poppler, qpdf, tesseract, pandoc, ffmpeg, ImageMagick, exiftool, whisper, node, yt-dlp"
   else rojo "No quedaron todos: $(brew_falta | tr '\n' ' ')"; fi
@@ -165,6 +176,7 @@ fi
 tiene_python_docs || gris "Preparando Python con las librerías de documentos (unos minutos)..."
 if instalar_uv && instalar_python_docs; then persistir_python_docs; verde "Python con librerías de PDF, Word, Excel, PowerPoint, imágenes y OCR"
 else rojo "No se pudo preparar el Python con las librerías de documentos."; fi
+usar_macports && herramientas_intel_final
 
 tiene_modelo_whisper || gris "Bajando el modelo para transcribir audio (~550 MB)..."
 if instalar_modelo_whisper; then verde "Modelo de transcripción en $HERR_MODELO"; else rojo "No se pudo bajar el modelo de transcripción."; fi

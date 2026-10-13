@@ -86,9 +86,33 @@ tiene_obsidian() { [[ -d /Applications/Obsidian.app || -d "$HOME/Applications/Ob
 
 instalar_obsidian() {
   tiene_obsidian && return 0
-  tiene_brew || return 1
-  HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ENV_HINTS=1 brew install --cask obsidian >/dev/null 2>&1
+  if tiene_brew; then
+    HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ENV_HINTS=1 brew install --cask obsidian >/dev/null 2>&1
+  else
+    instalar_obsidian_dmg   # Mac Intel sin Homebrew
+  fi
   tiene_obsidian
+}
+
+# El .dmg oficial (universal) del GitHub de Obsidian; se verifica la firma.
+instalar_obsidian_dmg() {
+  local url tmp r=0
+  url="$(curl -fsSL --max-time 30 https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest 2>/dev/null \
+    | grep -o 'https://[^"]*/Obsidian-[0-9.]*\.dmg' | head -1)"
+  [[ -n "$url" ]] || return 1
+  tmp="$(mktemp -d)"
+  curl -fL --max-time 1800 "$url" -o "$tmp/obsidian.dmg" 2>/dev/null || { rm -rf "$tmp"; return 1; }
+  hdiutil attach -nobrowse -quiet -mountpoint "$tmp/vol" "$tmp/obsidian.dmg" 2>/dev/null || { rm -rf "$tmp"; return 1; }
+  if firmado_por "$tmp/vol/Obsidian.app" "Developer ID Application:"; then
+    local destino="/Applications"
+    [[ -w "$destino" ]] || { destino="$HOME/Applications"; mkdir -p "$destino"; }
+    ditto "$tmp/vol/Obsidian.app" "$destino/Obsidian.app" 2>/dev/null || r=1
+  else
+    r=4
+  fi
+  hdiutil detach -quiet "$tmp/vol" 2>/dev/null
+  rm -rf "$tmp"
+  return $r
 }
 
 # Dónde va: la persona escoge. iCloud se ofrece primero porque se sincroniza con el
