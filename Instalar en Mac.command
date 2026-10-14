@@ -65,6 +65,7 @@ diagnostico() {
   fila "Audio y video (ffmpeg, yt-dlp)"       tiene_audio
   fila "Transcripción (whisper + modelo)"     tiene_transcripcion
   fila "Python con librerías de documentos"   tiene_python_docs
+  fila "Apple Vision (OCR) y Silero (voz)"    tiene_python_ia
   fila "Node con docx y pptxgenjs"            tiene_npm_docs
   fila "Plugins de oficina y documentos"     tiene_plugins
   if tiene_office_alguna; then fila "Claude en Word, Excel y PowerPoint" tiene_claude_en_office
@@ -176,6 +177,9 @@ fi
 tiene_python_docs || gris "Preparando Python con las librerías de documentos (unos minutos)..."
 if instalar_uv && instalar_python_docs; then persistir_python_docs; verde "Python con librerías de PDF, Word, Excel, PowerPoint, imágenes y OCR"
 else rojo "No se pudo preparar el Python con las librerías de documentos."; fi
+tiene_python_ia || gris "Instalando Apple Vision (OCR) y Silero (detección de voz); trae torch, ~700 MB..."
+if instalar_python_ia; then verde "Apple Vision (ocrmac) y Silero VAD"
+else rojo "No se pudieron instalar Apple Vision y Silero."; fi
 usar_macports && herramientas_intel_final
 
 tiene_modelo_whisper || gris "Bajando el modelo para transcribir audio (~550 MB)..."

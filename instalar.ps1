@@ -52,6 +52,7 @@ function Diagnostico {
   Fila "Audio y video (ffmpeg, yt-dlp)"        (Tiene-Audio)
   Fila "Transcripción (whisper + modelo)"      (Tiene-Transcripcion)
   Fila "Python con librerías de documentos"    (Tiene-PythonDocs)
+  Fila "Silero (detección de voz)"             (Tiene-PythonIa)
   Fila "Node con docx y pptxgenjs"             (Tiene-NpmDocs)
   Fila "Plugins de oficina y documentos"       (Tiene-Plugins)
   Fila "FastTrack (literatura académica)"      (Tiene-FastTrack)
@@ -125,6 +126,8 @@ if (Instalar-OcrEs) { Verde "OCR en español" } else { Rojo "No se pudo preparar
 if (Instalar-NpmDocs) { Verde "Node: docx y pptxgenjs" } else { Rojo "No se pudieron instalar docx y pptxgenjs." }
 if ((Instalar-Uv) -and (Instalar-PythonDocs)) { Verde "Python con librerías de PDF, Word, Excel, PowerPoint, imágenes y OCR" }
 else { Rojo "No se pudo preparar el Python con las librerías de documentos." }
+if (-not (Tiene-PythonIa)) { Gris "Instalando Silero (detección de voz); trae torch, ~700 MB..." }
+if (Instalar-PythonIa) { Verde "Silero VAD" } else { Rojo "No se pudo instalar Silero." }
 if (Instalar-WhisperCli) { Verde "whisper-cli" } else { Rojo "No se pudo bajar whisper-cli." }
 if (-not (Tiene-ModeloWhisper)) { Gris "Bajando el modelo para transcribir audio (~550 MB)..." }
 if (Instalar-ModeloWhisper) { Verde "Modelo de transcripción en $script:Modelo" } else { Rojo "No se pudo bajar el modelo de transcripción." }

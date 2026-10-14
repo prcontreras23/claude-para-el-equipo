@@ -23,11 +23,13 @@ El instalador dejó lo siguiente. Úsalo antes de decir que algo no se puede hac
 - **Python con librerías de documentos**: `python3` ya trae pypdf, pdfplumber, pymupdf, pikepdf, reportlab, pdf2image, img2pdf, python-docx, openpyxl, xlsxwriter, pandas, python-pptx, pillow, matplotlib, pytesseract y markitdown. (Mac: `~/.local/share/claude-equipo/python` · Windows: `%LOCALAPPDATA%\claude-equipo\python`.)
 - **PDF**: `pdftotext -layout`, `pdftoppm -png -r 300` (páginas a imagen), `qpdf` (unir, dividir, desbloquear, reparar).
 - **OCR**: `tesseract imagen.png salida -l spa+eng`. Para un PDF escaneado: `pdftoppm` a imágenes y luego `tesseract` página por página. Si el texto sale basura, probar a rotar la imagen 180° antes de darlo por ilegible.
+- **OCR con Apple Vision (solo Mac)**: más preciso que tesseract en fotos y escaneos, y respeta tildes. `python3 -c "from ocrmac import ocrmac; print('\\n'.join(t for t,_,_ in ocrmac.OCR('imagen.png', language_preference=['es-ES']).recognize()))"`. Para un PDF, pasar antes cada página a imagen con `pdftoppm -r 200 -png`.
 - **Word, Excel y PowerPoint**: `soffice --headless --convert-to pdf archivo.docx` (también a docx, xlsx, pptx); `pandoc` para Markdown ↔ Word; `markitdown archivo` para leer cualquier documento como texto. Node trae `docx` y `pptxgenjs` para crear Word y PowerPoint.
 - **Skills de documentos**: el plugin oficial `document-skills` de Anthropic (pdf, docx, xlsx, pptx) está instalado en Claude Code.
 - **Imágenes**: `magick` (ImageMagick) para convertir, redimensionar y recortar; `exiftool` para metadatos.
 - **Audio y video**: `ffmpeg`; `yt-dlp` para bajar audio o video de un enlace.
 - **Transcribir audio**: primero `ffmpeg -i entrada -ar 16000 -ac 1 audio.wav`, luego `whisper-cli -m <modelo> -l es -f audio.wav -otxt`. Modelo — Mac: `~/.local/share/claude-equipo/whisper/ggml-large-v3-turbo-q5_0.bin` · Windows: `%LOCALAPPDATA%\claude-equipo\whisper\ggml-large-v3-turbo-q5_0.bin`.
+- **Detectar dónde hay voz (Silero VAD)**: para cortar silencios o saber qué tramos tienen habla. Pasar el audio a WAV 16 kHz mono con ffmpeg y luego: `python3 -c "import soundfile as sf, torch; from silero_vad import load_silero_vad, get_speech_timestamps; w,sr=sf.read('audio.wav',dtype='float32'); print(get_speech_timestamps(torch.from_numpy(w), load_silero_vad(), sampling_rate=sr, return_seconds=True))"`. No usar `read_audio` de silero (pide torchaudio, que no está instalado).
 - **Claude en Office**: Word, Excel y PowerPoint tienen el complemento de Claude (Inicio → Complementos), si Office está instalado.
 
 ## Sobre la persona que usa esta computadora

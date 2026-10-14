@@ -67,6 +67,7 @@ En Mac el doble clic en `Instalar en Mac.command` **no funciona si el archivo se
 | Herramientas (PDF, Office, imágenes, OCR, audio) | Homebrew: poppler, qpdf, tesseract + español, pandoc, ffmpeg, ImageMagick, exiftool, whisper-cpp, node, yt-dlp, LibreOffice. En Mac Intel (Homebrew ya no funciona ahí): MacPorts, los .pkg/.dmg oficiales de pandoc, Node y LibreOffice, yt-dlp por pip y whisper.cpp compilado | winget: los mismos (whisper.cpp desde su GitHub oficial) |
 | Python de documentos | `uv` + Python 3.12 en `~/.local/share/claude-equipo/python` con pypdf, pdfplumber, pymupdf, pikepdf, reportlab, python-docx, openpyxl, pandas, python-pptx, pillow, pytesseract, markitdown… | Igual, en `%LOCALAPPDATA%\claude-equipo\python` |
 | Transcripción | Modelo whisper `large-v3-turbo` q5_0 (~550 MB) | Igual |
+| OCR y voz | En ese Python: `ocrmac` (OCR con Apple Vision, el del sistema) y `silero-vad` + soundfile (detecta voz; trae torch, ~700 MB) | Solo `silero-vad` (Apple Vision no existe en Windows) |
 | Skills de documentos | Plugin oficial `document-skills` de Anthropic en Claude Code | Igual |
 | Configuración | Copia `config/` a `~/.claude/` y encima el perfil, si lo hay | Igual, en `%USERPROFILE%\.claude\` |
 
@@ -100,6 +101,7 @@ Se puede volver a correr las veces que haga falta: lo instalado se detecta y se 
 | Herramientas (PDF, Office, imágenes, OCR, audio) | Homebrew: poppler, qpdf, tesseract + español, pandoc, ffmpeg, ImageMagick, exiftool, whisper-cpp, node, yt-dlp, LibreOffice. En Mac Intel (Homebrew ya no funciona ahí): MacPorts, los .pkg/.dmg oficiales de pandoc, Node y LibreOffice, yt-dlp por pip y whisper.cpp compilado | winget: los mismos (whisper.cpp desde su GitHub oficial) |
 | Python de documentos | `uv` + Python 3.12 en `~/.local/share/claude-equipo/python` con pypdf, pdfplumber, pymupdf, pikepdf, reportlab, python-docx, openpyxl, pandas, python-pptx, pillow, pytesseract, markitdown… | Igual, en `%LOCALAPPDATA%\claude-equipo\python` |
 | Transcripción | Modelo whisper `large-v3-turbo` q5_0 (~550 MB) | Igual |
+| OCR y voz | En ese Python: `ocrmac` (OCR con Apple Vision, el del sistema) y `silero-vad` + soundfile (detecta voz; trae torch, ~700 MB) | Solo `silero-vad` (Apple Vision no existe en Windows) |
 | Skills de documentos | Plugin oficial `document-skills` de Anthropic en Claude Code | Igual |
 | Configuración | Copia `config/` a `~/.claude/` y encima el perfil, si lo hay | Igual, en `%USERPROFILE%\.claude\` |
 | Sesión | Abre `claude` para que la persona entre con su cuenta (navegador) | Igual |

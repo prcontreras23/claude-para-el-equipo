@@ -5,6 +5,8 @@
 #   Homebrew  → poppler, qpdf, tesseract (+ español), pandoc, ffmpeg, imagemagick,
 #               exiftool, whisper-cpp, node, yt-dlp y LibreOffice
 #   uv        → un Python propio con las librerías de documentos (queda primero en el PATH)
+#   uv        → además, en ese mismo Python: ocrmac (OCR con Apple Vision) y
+#               silero-vad (detecta dónde hay voz en un audio; trae torch, ~700 MB)
 #   npm       → docx y pptxgenjs (los usan los skills de Word y PowerPoint)
 #   Whisper   → modelo large-v3-turbo (q5_0, ~550 MB) para transcribir en español
 #   Claude    → plugins oficiales: document-skills y los de oficina (productivity,
@@ -26,6 +28,10 @@ BREW_FORMULAS=(poppler:pdftotext qpdf:qpdf tesseract:tesseract pandoc:pandoc ffm
 PY_LIBS=(pypdf pdfplumber pymupdf pikepdf reportlab pdf2image img2pdf pytesseract
          python-docx openpyxl xlsxwriter pandas python-pptx pillow matplotlib defusedxml
          "markitdown[all]" qrcode)
+# Apple Vision y Silero: aparte de PY_LIBS porque torch pesa y tarda; si falla,
+# el Python de documentos queda igual. Sin torchaudio: su torchcodec choca con
+# torch nuevo; el audio se lee con soundfile.
+PY_IA_LIBS=(ocrmac silero-vad soundfile)
 NPM_LIBS=(docx pptxgenjs)
 
 # ------------------------------------------------------------------ Homebrew
@@ -118,6 +124,18 @@ instalar_python_docs() {
   [[ -x "$HERR_PY/bin/python" ]] || uv venv --quiet --python 3.12 "$HERR_PY" >/dev/null 2>&1 || return 1
   uv pip install --quiet --python "$HERR_PY/bin/python" "${PY_LIBS[@]}" >/dev/null 2>&1
   tiene_python_docs
+}
+
+tiene_python_ia() {
+  [[ -x "$HERR_PY/bin/python" ]] || return 1
+  "$HERR_PY/bin/python" -c "import ocrmac, silero_vad, soundfile, torch" 2>/dev/null
+}
+
+instalar_python_ia() {
+  tiene_python_ia && return 0
+  [[ -x "$HERR_PY/bin/python" ]] || return 1
+  uv pip install --quiet --python "$HERR_PY/bin/python" "${PY_IA_LIBS[@]}" >/dev/null 2>&1
+  tiene_python_ia
 }
 
 # Ese Python queda primero en el PATH, así `python3` y `pip` ya traen las librerías.

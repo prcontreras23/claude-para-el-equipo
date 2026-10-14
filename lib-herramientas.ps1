@@ -156,6 +156,24 @@ function Instalar-PythonDocs {
   return (Tiene-PythonDocs)
 }
 
+# Silero VAD (detecta donde hay voz en un audio). Trae torch (~700 MB), por eso va
+# aparte. Apple Vision es solo de Mac. Sin torchaudio: el audio se lee con soundfile.
+$script:PyIaLibs = @("silero-vad","soundfile")
+
+function Tiene-PythonIa {
+  if (-not (Test-Path $script:HerrPyExe)) { return $false }
+  & $script:HerrPyExe -c "import silero_vad, soundfile, torch" 2>$null
+  return ($LASTEXITCODE -eq 0)
+}
+
+function Instalar-PythonIa {
+  if (Tiene-PythonIa) { return $true }
+  if (-not (Test-Path $script:HerrPyExe)) { return $false }
+  $libs = $script:PyIaLibs
+  & uv pip install --quiet --python $script:HerrPyExe $libs 2>&1 | Out-Null
+  return (Tiene-PythonIa)
+}
+
 # ------------------------------------------------------------------ Librerias de Node
 
 function Tiene-NpmDocs {
