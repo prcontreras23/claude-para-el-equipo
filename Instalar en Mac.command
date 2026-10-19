@@ -23,6 +23,7 @@ source ./lib-requisitos.sh
 source ./lib-config.sh
 source ./lib-herramientas.sh
 source ./lib-intel.sh
+source ./lib-oficiales.sh
 source ./lib-perfil.sh
 source ./lib-extras.sh
 
@@ -162,10 +163,12 @@ fi
 if usar_macports; then
   :
 elif tiene_brew; then
-  gris "Programas (esto puede tardar 10–20 minutos la primera vez)..."
-  if instalar_formulas; then verde "poppler, qpdf, tesseract, pandoc, ffmpeg, ImageMagick, exiftool, whisper, node, yt-dlp"
+  gris "Programas con Homebrew (puede tardar varios minutos la primera vez)..."
+  if instalar_formulas; then verde "poppler, qpdf, tesseract, ffmpeg, ImageMagick, whisper"
   else rojo "No quedaron todos: $(brew_falta | tr '\n' ' ')"; fi
-  tiene_libreoffice || gris "Bajando LibreOffice (~300 MB, unos minutos; no cierres esta ventana)..."
+  gris "yt-dlp, pandoc, Node y exiftool, de la página oficial de cada uno..."
+  herramientas_oficiales
+  tiene_libreoffice || gris "Bajando LibreOffice de su página oficial (~350 MB, unos minutos; no cierres esta ventana)..."
   if instalar_libreoffice; then verde "LibreOffice"; else rojo "LibreOffice no quedó instalado."; fi
   if instalar_ocr_es; then verde "OCR en español"; else rojo "No se pudo bajar el español para el OCR."; fi
   tiene_npm_docs || gris "Instalando docx y pptxgenjs..."
@@ -192,7 +195,7 @@ verde "~/.claude listo (lo que había quedó respaldado en ~/.claude/respaldo-*)
 
 paso "7/7  Plugins y conectores de Claude Code"
 gris "document-skills, productivity, enterprise-search, operations, human-resources,"
-gris "finance, data, marketing y pdf-viewer"
+gris "finance, data, marketing, pdf-viewer y watch (ver videos)"
 if instalar_plugins; then verde "Plugins instalados y activos"
 else rojo "No quedaron: $(plugins_faltan | tr '\n' ' ')"; fi
 if instalar_fasttrack; then verde "FastTrack (búsqueda de literatura académica)"; else rojo "No se pudo agregar FastTrack."; fi

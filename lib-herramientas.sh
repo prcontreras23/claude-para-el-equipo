@@ -2,8 +2,11 @@
 # Herramientas para que Claude pueda trabajar con PDF, Word, Excel, PowerPoint,
 # imágenes, OCR y audio en macOS. Lo carga "Instalar en Mac.command".
 #
-#   Homebrew  → poppler, qpdf, tesseract (+ español), pandoc, ffmpeg, imagemagick,
-#               exiftool, whisper-cpp, node, yt-dlp y LibreOffice
+#   Homebrew  → poppler, qpdf, tesseract (+ español), ffmpeg, imagemagick y
+#               whisper-cpp (no tienen un binario oficial para Mac)
+#   Oficiales → yt-dlp, pandoc, Node, exiftool y LibreOffice, bajados ya compilados
+#               de la página de cada proyecto (ver lib-oficiales.sh): menos
+#               descargas que por Homebrew y la versión del autor
 #   uv        → un Python propio con las librerías de documentos (queda primero en el PATH)
 #   uv        → además, en ese mismo Python: ocrmac (OCR con Apple Vision) y
 #               silero-vad (detecta dónde hay voz en un audio; trae torch, ~700 MB)
@@ -11,7 +14,7 @@
 #   Whisper   → modelo large-v3-turbo (q5_0, ~550 MB) para transcribir en español
 #   Claude    → plugins oficiales: document-skills y los de oficina (productivity,
 #               enterprise-search, operations, human-resources, finance, data,
-#               marketing, pdf-viewer)
+#               marketing, pdf-viewer) y watch (ver videos: fotogramas + transcripción)
 #
 # Homebrew es lo único que pide la contraseña de la Mac (una vez).
 
@@ -23,8 +26,9 @@ HERR_MODELO_BYTES=574041195
 
 # fórmula:programa — se instala la fórmula solo si el programa no está ya (por
 # ejemplo, pandoc o node instalados por otra vía).
-BREW_FORMULAS=(poppler:pdftotext qpdf:qpdf tesseract:tesseract pandoc:pandoc ffmpeg:ffmpeg
-               imagemagick:magick exiftool:exiftool whisper-cpp:whisper-cli node:node yt-dlp:yt-dlp)
+# pandoc, node, exiftool y yt-dlp ya no van por aquí: se bajan de su fuente oficial.
+BREW_FORMULAS=(poppler:pdftotext qpdf:qpdf tesseract:tesseract ffmpeg:ffmpeg
+               imagemagick:magick whisper-cpp:whisper-cli)
 PY_LIBS=(pypdf pdfplumber pymupdf pikepdf reportlab pdf2image img2pdf pytesseract
          python-docx openpyxl xlsxwriter pandas python-pptx pillow matplotlib defusedxml
          "markitdown[all]" qrcode)
@@ -76,11 +80,9 @@ instalar_formulas() {
 
 tiene_libreoffice() { [[ -d /Applications/LibreOffice.app || -d "$HOME/Applications/LibreOffice.app" ]]; }
 
-instalar_libreoffice() {
-  tiene_libreoffice && return 0
-  HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ENV_HINTS=1 brew install --cask libreoffice >/dev/null 2>&1
-  tiene_libreoffice
-}
+# El .dmg oficial de The Document Foundation (instalar_libreoffice_dmg, en
+# lib-intel.sh), en Intel y en Apple Silicon.
+instalar_libreoffice() { instalar_libreoffice_dmg; }
 
 # ------------------------------------------------------------------ OCR en español
 
@@ -181,12 +183,16 @@ instalar_modelo_whisper() {
 # y los de trabajo de oficina de knowledge-work-plugins. Se declaran también en
 # config/settings.json, y se instalan después de aplicar la configuración, porque
 # instalar escribe en ~/.claude/settings.json.
-MARKETPLACES=(anthropics/skills anthropics/knowledge-work-plugins)
+# watch (bradautomates/claude-video, MIT): Claude «ve» un video de YouTube,
+# Instagram, TikTok o un archivo local — fotogramas con ffmpeg, subtítulos con
+# yt-dlp. Se deja en modo local: nada sale de la computadora sin pedirlo.
+MARKETPLACES=(anthropics/skills anthropics/knowledge-work-plugins bradautomates/claude-video)
 PLUGINS=(document-skills@anthropic-agent-skills
          productivity@knowledge-work-plugins enterprise-search@knowledge-work-plugins
          operations@knowledge-work-plugins human-resources@knowledge-work-plugins
          finance@knowledge-work-plugins data@knowledge-work-plugins
-         marketing@knowledge-work-plugins pdf-viewer@knowledge-work-plugins)
+         marketing@knowledge-work-plugins pdf-viewer@knowledge-work-plugins
+         watch@claude-video)
 
 tiene_plugins() {
   local lista p; lista="$(claude plugin list 2>/dev/null)" || return 1
@@ -205,7 +211,21 @@ instalar_plugins() {
   for m in "${MARKETPLACES[@]}"; do claude plugin marketplace add "$m" >/dev/null 2>&1; done
   claude plugin marketplace update >/dev/null 2>&1
   for p in "${PLUGINS[@]}"; do claude plugin install "$p" >/dev/null 2>&1; done
+  configurar_watch
   tiene_plugins
+}
+
+# Deja watch configurado para que no haga preguntas la primera vez: motor local
+# (el video no se sube a Google), detalle «balanced» y sin transcripción en la
+# nube. Corre con el Python del equipo (watch pide 3.10 o más; el de macOS es 3.9).
+# Si la persona ya tiene su configuración, no se toca.
+configurar_watch() {
+  [[ -s "$HOME/.config/watch/.env" ]] && grep -qs '^SETUP_COMPLETE=' "$HOME/.config/watch/.env" && return 0
+  local dir py="$HERR_PY/bin/python"
+  dir="$(ls -d "$HOME"/.claude/plugins/cache/claude-video/watch/*/skills/watch 2>/dev/null | sort -V | tail -1)"
+  [[ -n "$dir" && -x "$py" ]] || return 1
+  "$py" "$dir/scripts/setup.py" --engine local >/dev/null 2>&1
+  "$py" "$dir/scripts/setup.py" --backend none --detail balanced >/dev/null 2>&1
 }
 
 # ------------------------------------------------------------------ Sesión de Claude Code

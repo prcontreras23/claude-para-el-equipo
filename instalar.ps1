@@ -139,7 +139,7 @@ Verde "$env:USERPROFILE\.claude listo (si ya tenías tu propia configuración, s
 
 Paso "7/7  Plugins y conectores de Claude Code"
 Gris "document-skills, productivity, enterprise-search, operations, human-resources,"
-Gris "finance, data, marketing y pdf-viewer"
+Gris "finance, data, marketing, pdf-viewer y watch (ver videos)"
 if (Instalar-Plugins) { Verde "Plugins instalados y activos" } else { Rojo ("No quedaron: " + ((Plugins-Faltan) -join ", ")) }
 if (Instalar-FastTrack) { Verde "FastTrack (búsqueda de literatura académica)" } else { Rojo "No se pudo agregar FastTrack." }
 

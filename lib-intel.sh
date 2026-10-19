@@ -8,7 +8,7 @@
 #                    ffmpeg y cmake (para compilar whisper; si no, cmake por pip)
 #   .pkg oficiales → pandoc (GitHub de pandoc) y Node LTS (nodejs.org)
 #   .dmg oficial   → LibreOffice x86-64 (documentfoundation.org)
-#   pip            → yt-dlp, en el Python que prepara el instalador
+#   binario oficial → yt-dlp (lib-oficiales.sh); pip solo si ese falla
 #   código fuente  → whisper.cpp (no hay port ni wheel para Intel), con cmake;
 #                    deja whisper-cli en ~/.local/bin, igual que en Apple Silicon
 #
@@ -146,14 +146,20 @@ npm_prefijo_propio() {
 
 # ------------------------------------------------------------------ LibreOffice (.dmg oficial)
 
+# Se usa en todas las Mac, no solo en Intel: es el mismo .dmg que baja Homebrew,
+# pero sin pasar por Homebrew.
+
 instalar_libreoffice_dmg() {
   tiene_libreoffice && return 0
   local base="https://download.documentfoundation.org/libreoffice/stable" v
   v="$(curl -fsSL --max-time 30 "$base/" 2>/dev/null | grep -o 'href="[0-9][0-9.]*/"' \
     | grep -o '[0-9][0-9.]*[0-9]' | sort -t. -k1,1n -k2,2n -k3,3n | tail -1)"
   [[ -n "$v" ]] || return 1
+  # Mismo .dmg oficial en las dos arquitecturas; solo cambia la carpeta y el nombre.
+  local carpeta=x86_64 sufijo=x86-64
+  [[ "$(uname -m)" == "arm64" ]] && { carpeta=aarch64; sufijo=aarch64; }
   local tmp r=0; tmp="$(mktemp -d)"
-  curl -fL --max-time 1800 "$base/$v/mac/x86_64/LibreOffice_${v}_MacOS_x86-64.dmg" -o "$tmp/lo.dmg" 2>/dev/null \
+  curl -fL --max-time 1800 "$base/$v/mac/$carpeta/LibreOffice_${v}_MacOS_${sufijo}.dmg" -o "$tmp/lo.dmg" 2>/dev/null \
     || { rm -rf "$tmp"; return 1; }
   hdiutil attach -nobrowse -quiet -mountpoint "$tmp/vol" "$tmp/lo.dmg" 2>/dev/null || { rm -rf "$tmp"; return 1; }
   local app="$tmp/vol/LibreOffice.app"
@@ -263,7 +269,8 @@ herramientas_intel() {
 
 # Lo que va después del Python (yt-dlp por pip) y whisper compilado.
 herramientas_intel_final() {
-  if instalar_ytdlp_pip; then verde "yt-dlp"; else rojo "yt-dlp no quedó instalado (hace falta el Python del paso anterior)."; fi
+  # yt-dlp: el binario oficial (lib-oficiales.sh); por pip solo si ese no se pudo.
+  if instalar_ytdlp_oficial || instalar_ytdlp_pip; then verde "yt-dlp"; else rojo "yt-dlp no quedó instalado (revisa el internet y vuelve a correr el instalador)."; fi
   tiene whisper-cli || gris "Compilando whisper para transcribir (5–15 minutos en Intel)..."
   if instalar_whisper_fuente; then verde "whisper"
   else rojo "whisper no quedó instalado: hace falta cmake y las Command Line Tools de Apple (paso 1, git)."; fi

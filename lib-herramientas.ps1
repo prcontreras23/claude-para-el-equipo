@@ -235,12 +235,16 @@ function Instalar-ModeloWhisper {
 # y los de trabajo de oficina de knowledge-work-plugins. Se declaran tambien en
 # config/settings.json y se instalan despues de aplicar la configuracion, porque
 # instalar escribe en settings.json. Se corre siempre: instalar dos veces no hace dano.
-$script:Marketplaces = @("anthropics/skills","anthropics/knowledge-work-plugins")
+# watch (bradautomates/claude-video, MIT): Claude "ve" un video de YouTube,
+# Instagram, TikTok o un archivo local. Se deja en modo local: nada sale de la
+# computadora sin pedirlo.
+$script:Marketplaces = @("anthropics/skills","anthropics/knowledge-work-plugins","bradautomates/claude-video")
 $script:Plugins = @("document-skills@anthropic-agent-skills",
   "productivity@knowledge-work-plugins","enterprise-search@knowledge-work-plugins",
   "operations@knowledge-work-plugins","human-resources@knowledge-work-plugins",
   "finance@knowledge-work-plugins","data@knowledge-work-plugins",
-  "marketing@knowledge-work-plugins","pdf-viewer@knowledge-work-plugins")
+  "marketing@knowledge-work-plugins","pdf-viewer@knowledge-work-plugins",
+  "watch@claude-video")
 
 function Plugins-Faltan {
   $lista = (claude plugin list 2>&1 | Out-String)
@@ -253,7 +257,24 @@ function Instalar-Plugins {
   foreach ($m in $script:Marketplaces) { claude plugin marketplace add $m 2>&1 | Out-Null }
   claude plugin marketplace update 2>&1 | Out-Null
   foreach ($p in $script:Plugins) { claude plugin install $p 2>&1 | Out-Null }
+  Configurar-Watch | Out-Null
   return (Tiene-Plugins)
+}
+
+# Deja watch configurado sin preguntas: motor local (el video no se sube a Google),
+# detalle "balanced" y sin transcripcion en la nube. Usa el Python del equipo
+# (watch pide 3.10 o mas). Si la persona ya tiene su configuracion, no se toca.
+function Configurar-Watch {
+  $env_watch = Join-Path $HOME ".config\watch\.env"
+  if ((Test-Path $env_watch) -and (Select-String -Path $env_watch -Pattern '^SETUP_COMPLETE=' -Quiet)) { return $true }
+  $base = Join-Path $HOME ".claude\plugins\cache\claude-video\watch"
+  if (-not (Test-Path $base) -or -not (Test-Path $script:HerrPyExe)) { return $false }
+  $dir = Get-ChildItem $base -Directory | Sort-Object { [version]($_.Name -replace '[^0-9.]','') } | Select-Object -Last 1
+  if (-not $dir) { return $false }
+  $setup = Join-Path $dir.FullName "skills\watch\scripts\setup.py"
+  & $script:HerrPyExe $setup --engine local 2>&1 | Out-Null
+  & $script:HerrPyExe $setup --backend none --detail balanced 2>&1 | Out-Null
+  return $true
 }
 
 function Sesion-ClaudeCodeActiva {
