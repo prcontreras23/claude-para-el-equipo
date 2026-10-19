@@ -174,7 +174,8 @@ function Paso-SegundoCerebro($fuenteRepo) {
     if ($u -match "3") { $usos += "formación y estudios"; $carpetas += "  cursos/      una página por curso o materia" }
     if ($u -match "4") { $usos += "personal (metas, salud, finanzas)"; $carpetas += "  personal/    metas, hábitos, salud y finanzas" }
     if ($usos.Count -eq 0) { $usos = @("general") }
-    $temas   = Preguntar "¿Qué temas principales vas a guardar ahí?" "las iglesias de mi distrito, finanzas, evangelismo, liderazgo"
+    $ejTemas = if ($script:EsAdose) { "las iglesias de mi distrito, finanzas, evangelismo, liderazgo" } else { "trabajo, estudios, finanzas, proyectos personales" }
+    $temas   = Preguntar "¿Qué temas principales vas a guardar ahí?" $ejTemas
     $fuentes = Preguntar "¿Qué vas a traer como fuentes?" "PDF, actas, audios de reuniones, artículos de internet, fotos de documentos"
     $m = ""
     while ($m -ne "1" -and $m -ne "2") {

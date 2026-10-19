@@ -224,7 +224,9 @@ paso_segundo_cerebro() {
   personal/    metas, hábitos, salud y finanzas"; }
     [[ -z "$usos" ]] && usos="general; "
     usos="${usos%; }"
-    preguntar "¿Qué temas principales vas a guardar ahí?" "las iglesias de mi distrito, finanzas, evangelismo, liderazgo"; local temas="$R"
+    local ej_temas="trabajo, estudios, finanzas, proyectos personales"
+    [[ "${ES_ADOSE:-n}" == "s" ]] && ej_temas="las iglesias de mi distrito, finanzas, evangelismo, liderazgo"
+    preguntar "¿Qué temas principales vas a guardar ahí?" "$ej_temas"; local temas="$R"
     preguntar "¿Qué vas a traer como fuentes?" "PDF, actas, audios de reuniones, artículos de internet, fotos de documentos"; local fuentes="$R"
     local m="" modo
     while [[ "$m" != "1" && "$m" != "2" ]]; do

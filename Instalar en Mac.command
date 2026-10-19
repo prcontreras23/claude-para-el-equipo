@@ -245,10 +245,16 @@ negrita "Lo automático terminó. Ahora te guío en $TOTAL pasos cortos."
 gris "En cada uno se abre lo que haga falta y el instalador espera a que termines."
 
 if siguiente "Entrar a Claude en internet"; then
-if ya_hecho "¿Ya entraste antes a claude.ai con tu correo del equipo?"; then verde "claude.ai"
+if ya_hecho "¿Ya entraste antes a claude.ai$([[ "$ES_ADOSE" == s ]] && echo ' con tu correo del equipo')?"; then verde "claude.ai"
 else
-  gris "Se abre claude.ai. Escribe el correo con el que te invitaron; Claude te manda"
-  gris "un código a ese correo. Búscalo en tu correo, pégalo y entra."
+  if [[ "$ES_ADOSE" == s ]]; then
+    gris "Se abre claude.ai. Escribe el correo con el que te invitaron; Claude te manda"
+    gris "un código a ese correo. Búscalo en tu correo, pégalo y entra."
+  else
+    gris "Se abre claude.ai. Entra con tu correo; si todavía no tienes cuenta, créala ahí mismo."
+    gris "Claude te manda un código a ese correo. Búscalo, pégalo y entra."
+    gris "Claude Code y Cowork necesitan un plan pago (Pro o Max); el gratuito no los trae."
+  fi
   abrir_web "https://claude.ai/login"
   esperar "Cuando ya estés dentro de claude.ai, presiona Enter..."
   verde "claude.ai"
@@ -266,7 +272,8 @@ else
   gris "  • Gmail y Google Calendar — si también usas Google"
   gris "  • Google Drive — si guardas documentos ahí"
   gris "  • FastTrack — en «Añadir» → conector personalizado, pega: $FASTTRACK_URL"
-  gris "Si Microsoft 365 no aparece, avisa a Secretaría: lo activa el administrador del equipo."
+  if [[ "$ES_ADOSE" == s ]]; then gris "Si Microsoft 365 no aparece, avisa a Secretaría: lo activa el administrador del equipo."
+  else gris "Si Microsoft 365 no aparece, es que el administrador de tu cuenta no lo ha activado."; fi
   abrir_web "https://claude.ai/customize/connectors"
   esperar "Cuando hayas conectado los que usas, presiona Enter..."
   verde "Conectores"
@@ -367,7 +374,7 @@ for app in Word Excel Powerpoint; do
       rojo "No se detecta Claude en $nombre. Sigue; revísalo después en $nombre → Inicio → Complementos."
       break
     fi
-    gris "Se abre Claude para $nombre. Dale a «Obtener ahora», entra con tu correo del equipo"
+    gris "Se abre Claude para $nombre. Dale a «Obtener ahora», entra con tu cuenta de Claude"
     gris "y acepta abrirlo en $nombre. Si no abre: en $nombre ve a Inicio → Complementos,"
     gris "busca «Claude» y dale a «Agregar»."
     abrir_web "$(office_url "$app")"

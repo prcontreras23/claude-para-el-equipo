@@ -2,7 +2,7 @@
 
 Deja **Claude Code** y **Claude Desktop** instalados y configurados en una computadora que no tiene nada, con una sola línea (o un doble clic). Para Mac y Windows.
 
-Pensado para el equipo de ADOSE: la persona pega una línea, espera unos minutos, entra con su cuenta, y ya tiene Claude con las reglas del equipo (español, tono, qué no hacer con credenciales, fuentes oficiales).
+Pensado para el equipo de ADOSE, pero sirve para cualquier persona: al inicio pregunta si trabaja en ADOSE y, si contesta que no, no le queda nada de ADOSE (ni el contexto, ni el tono dominicano, ni los ejemplos). La persona pega una línea, espera unos minutos, entra con su cuenta, y ya tiene Claude con las reglas del equipo (español, tono, qué no hacer con credenciales, fuentes oficiales).
 
 ---
 
@@ -88,7 +88,7 @@ En Mac el doble clic en `Instalar en Mac.command` **no funciona si el archivo se
 | 9. Segundo cerebro (opcional) | Instala Obsidian, pregunta dónde crearlo (iCloud, OneDrive, Documentos u otra carpeta) y cuatro preguntas más; arma una bóveda con el patrón *LLM Wiki* de Karpathy (`fuentes/`, `wiki/`, `CLAUDE.md` como esquema) y la registra en Obsidian |
 | 10. Claude Code | Diagnóstico final, `claude auth login` hasta que quede la sesión, y abre `claude` |
 
-**Sirve igual si la persona ya usaba Claude**: lo instalado se salta, su `CLAUDE.md` se respeta (las reglas del equipo se importan desde `~/.claude/equipo-adose.md`) y su `settings.json` no se toca.
+**Sirve igual si la persona ya usaba Claude**: lo instalado se salta, su `CLAUDE.md` se respeta (las reglas del equipo se importan desde `~/.claude/equipo-claude.md`) y su `settings.json` no se toca.
 
 En Mac, **Homebrew pide una vez la contraseña de la computadora**; el resto no. En Mac Intel la pide MacPorts y los paquetes oficiales, también una sola vez, y la primera corrida tarda más (hasta una hora). En Windows, algunos programas (LibreOffice, Tesseract, Node) hacen que Windows pregunte si se permiten cambios: hay que darle a **Sí**. La primera corrida baja unos 2 GB y tarda de 20 a 40 minutos. Lo que ya existiera en `~/.claude` queda en `~/.claude/respaldo-<fecha>/`.
 

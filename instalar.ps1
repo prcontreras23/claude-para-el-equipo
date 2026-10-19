@@ -173,10 +173,17 @@ Negrita "Lo automático terminó. Ahora te guío en $script:Total pasos cortos."
 Gris "Todos son opcionales: Enter para hacerlo, n para saltarlo."
 
 if (Siguiente "Entrar a Claude en internet") {
-if (Ya-Hecho "¿Ya entraste antes a claude.ai con tu correo del equipo?") { Verde "claude.ai" }
+$pregCorreo = if ($script:EsAdose) { "¿Ya entraste antes a claude.ai con tu correo del equipo?" } else { "¿Ya entraste antes a claude.ai?" }
+if (Ya-Hecho $pregCorreo) { Verde "claude.ai" }
 else {
-  Gris "Se abre claude.ai. Escribe el correo con el que te invitaron; Claude te manda"
-  Gris "un código a ese correo. Búscalo en tu correo, pégalo y entra."
+  if ($script:EsAdose) {
+    Gris "Se abre claude.ai. Escribe el correo con el que te invitaron; Claude te manda"
+    Gris "un código a ese correo. Búscalo en tu correo, pégalo y entra."
+  } else {
+    Gris "Se abre claude.ai. Entra con tu correo; si todavía no tienes cuenta, créala ahí mismo."
+    Gris "Claude te manda un código a ese correo. Búscalo, pégalo y entra."
+    Gris "Claude Code y Cowork necesitan un plan pago (Pro o Max); el gratuito no los trae."
+  }
   Abrir-Web "https://claude.ai/login"
   Esperar "Cuando ya estés dentro de claude.ai, presiona Enter..."
   Verde "claude.ai"
@@ -193,7 +200,8 @@ else {
   Gris "  • Gmail y Google Calendar — si también usas Google"
   Gris "  • Google Drive — si guardas documentos ahí"
   Gris "  • FastTrack — en «Añadir» → conector personalizado, pega: $script:FastTrackUrl"
-  Gris "Si Microsoft 365 no aparece, avisa a Secretaría: lo activa el administrador del equipo."
+  if ($script:EsAdose) { Gris "Si Microsoft 365 no aparece, avisa a Secretaría: lo activa el administrador del equipo." }
+  else { Gris "Si Microsoft 365 no aparece, es que el administrador de tu cuenta no lo ha activado." }
   Abrir-Web "https://claude.ai/customize/connectors"
   Esperar "Cuando hayas conectado los que usas, presiona Enter..."
   Verde "Conectores"
@@ -281,7 +289,7 @@ foreach ($app in $script:OfficeApps.Keys) {
   $intentos = 0
   while (-not (Tiene-ClaudeOffice $app)) {
     if ($intentos -ge 3) { Rojo "No se detecta Claude en $app. Sigue; revísalo después en $app → Inicio → Complementos."; break }
-    Gris "Se abre Claude para $app. Dale a «Obtener ahora», entra con tu correo del equipo"
+    Gris "Se abre Claude para $app. Dale a «Obtener ahora», entra con tu cuenta de Claude"
     Gris "y acepta abrirlo en $app. Si no abre: en $app ve a Inicio → Complementos,"
     Gris "busca «Claude» y dale a «Agregar»."
     Abrir-Web ("https://appsource.microsoft.com/product/office/" + $script:OfficeApps[$app].Url)
