@@ -271,6 +271,7 @@ herramientas_intel() {
 herramientas_intel_final() {
   # yt-dlp: el binario oficial (lib-oficiales.sh); por pip solo si ese no se pudo.
   if instalar_ytdlp_oficial || instalar_ytdlp_pip; then verde "yt-dlp"; else rojo "yt-dlp no quedó instalado (revisa el internet y vuelve a correr el instalador)."; fi
+  quiere_audio || return 0
   tiene whisper-cli || gris "Compilando whisper para transcribir (5–15 minutos en Intel)..."
   if instalar_whisper_fuente; then verde "whisper"
   else rojo "whisper no quedó instalado: hace falta cmake y las Command Line Tools de Apple (paso 1, git)."; fi

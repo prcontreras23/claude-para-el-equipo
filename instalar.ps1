@@ -50,9 +50,10 @@ function Diagnostico {
   Fila "Word/Excel/PPT (LibreOffice, pandoc)"  (Tiene-Conversion)
   Fila "Imágenes (ImageMagick, exiftool)"      (Tiene-Imagenes)
   Fila "Audio y video (ffmpeg, yt-dlp)"        (Tiene-Audio)
-  Fila "Transcripción (whisper + modelo)"      (Tiene-Transcripcion)
+  if ($script:QuiereAudio) { Fila "Transcripción (whisper + modelo)"      (Tiene-Transcripcion) }
+  else { Gris "Transcripción: no se instala (no vas a trabajar audio)" }
   Fila "Python con librerías de documentos"    (Tiene-PythonDocs)
-  Fila "Silero (detección de voz)"             (Tiene-PythonIa)
+  if ($script:QuiereAudio) { Fila "Silero (detección de voz)"             (Tiene-PythonIa) }
   Fila "Node con docx y pptxgenjs"             (Tiene-NpmDocs)
   Fila "Plugins de oficina y documentos"       (Tiene-Plugins)
   Fila "FastTrack (literatura académica)"      (Tiene-FastTrack)
@@ -91,6 +92,18 @@ else {
   $script:EsAdose = ($r -match '^[sS]')
 }
 
+# Whisper, su modelo y Silero pesan ~1.3 GB y solo los usa quien transcribe o edita
+# grabaciones. Si ya estaban, se dan por elegidos (no se quitan ni se pregunta).
+$script:QuiereAudio = $false
+if (Tiene-Transcripcion) { $script:QuiereAudio = $true }
+else {
+  Gris "Transcribir audios (notas de voz, entrevistas) o editar grabaciones necesita"
+  Gris "bajar ~1.3 GB más. Si no lo vas a hacer, se salta y termina antes."
+  $r = ""
+  while ($r -notmatch '^[sSnN]') { $r = Read-Host "  ¿Vas a transcribir audios o editar grabaciones? (s/n) >" }
+  $script:QuiereAudio = ($r -match '^[sS]')
+}
+
 Paso "Revisando esta computadora..."
 Diagnostico
 
@@ -126,11 +139,15 @@ if (Instalar-OcrEs) { Verde "OCR en español" } else { Rojo "No se pudo preparar
 if (Instalar-NpmDocs) { Verde "Node: docx y pptxgenjs" } else { Rojo "No se pudieron instalar docx y pptxgenjs." }
 if ((Instalar-Uv) -and (Instalar-PythonDocs)) { Verde "Python con librerías de PDF, Word, Excel, PowerPoint, imágenes y OCR" }
 else { Rojo "No se pudo preparar el Python con las librerías de documentos." }
-if (-not (Tiene-PythonIa)) { Gris "Instalando Silero (detección de voz); trae torch, ~700 MB..." }
-if (Instalar-PythonIa) { Verde "Silero VAD" } else { Rojo "No se pudo instalar Silero." }
-if (Instalar-WhisperCli) { Verde "whisper-cli" } else { Rojo "No se pudo bajar whisper-cli." }
-if (-not (Tiene-ModeloWhisper)) { Gris "Bajando el modelo para transcribir audio (~550 MB)..." }
-if (Instalar-ModeloWhisper) { Verde "Modelo de transcripción en $script:Modelo" } else { Rojo "No se pudo bajar el modelo de transcripción." }
+if ($script:QuiereAudio) {
+  if (-not (Tiene-PythonIa)) { Gris "Instalando Silero (detección de voz); trae torch, ~700 MB..." }
+  if (Instalar-PythonIa) { Verde "Silero VAD" } else { Rojo "No se pudo instalar Silero." }
+  if (Instalar-WhisperCli) { Verde "whisper-cli" } else { Rojo "No se pudo bajar whisper-cli." }
+  if (-not (Tiene-ModeloWhisper)) { Gris "Bajando el modelo para transcribir audio (~550 MB)..." }
+  if (Instalar-ModeloWhisper) { Verde "Modelo de transcripción en $script:Modelo" } else { Rojo "No se pudo bajar el modelo de transcripción." }
+} else {
+  Gris "Transcripción y Silero: se saltan. Si después los necesitas, vuelve a correr el instalador y contesta s."
+}
 Persistir-RutasHerramientas
 
 Paso "6/7  Configuración del equipo"
@@ -138,8 +155,7 @@ Aplicar-Config $PSScriptRoot $Perfil $script:EsAdose
 Verde "$env:USERPROFILE\.claude listo (si ya tenías tu propia configuración, se respetó)"
 
 Paso "7/7  Plugins y conectores de Claude Code"
-Gris "document-skills, productivity, enterprise-search, operations, human-resources,"
-Gris "finance, data, marketing, pdf-viewer y watch (ver videos)"
+Gris "document-skills (Word, Excel, PowerPoint, PDF), productivity y watch (ver videos)"
 if (Instalar-Plugins) { Verde "Plugins instalados y activos" } else { Rojo ("No quedaron: " + ((Plugins-Faltan) -join ", ")) }
 if (Instalar-FastTrack) { Verde "FastTrack (búsqueda de literatura académica)" } else { Rojo "No se pudo agregar FastTrack." }
 

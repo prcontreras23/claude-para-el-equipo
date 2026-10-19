@@ -9,13 +9,6 @@
   },
   "enabledPlugins": {
     "productivity@knowledge-work-plugins": true,
-    "enterprise-search@knowledge-work-plugins": true,
-    "operations@knowledge-work-plugins": true,
-    "human-resources@knowledge-work-plugins": true,
-    "finance@knowledge-work-plugins": true,
-    "data@knowledge-work-plugins": true,
-    "marketing@knowledge-work-plugins": true,
-    "pdf-viewer@knowledge-work-plugins": true,
     "document-skills@anthropic-agent-skills": true
   },
   "extraKnownMarketplaces": {

@@ -64,9 +64,11 @@ diagnostico() {
   fila "Word/Excel/PPT (LibreOffice, pandoc)" tiene_conversion
   fila "Imágenes (ImageMagick, exiftool)"     tiene_imagenes
   fila "Audio y video (ffmpeg, yt-dlp)"       tiene_audio
-  fila "Transcripción (whisper + modelo)"     tiene_transcripcion
+  if quiere_audio; then fila "Transcripción (whisper + modelo)"     tiene_transcripcion
+  else gris "Transcripción: no se instala (no vas a trabajar audio)"; fi
   fila "Python con librerías de documentos"   tiene_python_docs
-  fila "Apple Vision (OCR) y Silero (voz)"    tiene_python_ia
+  fila "Apple Vision (OCR)"                   tiene_vision
+  if quiere_audio; then fila "Silero (detección de voz)"            tiene_silero; fi
   fila "Node con docx y pptxgenjs"            tiene_npm_docs
   fila "Plugins de oficina y documentos"     tiene_plugins
   if tiene_office_alguna; then fila "Claude en Word, Excel y PowerPoint" tiene_claude_en_office
@@ -106,6 +108,22 @@ elif : < /dev/tty 2>/dev/null; then
     read -r -p "  ¿Trabajas en ADOSE (Asociación Dominicana del Sureste)? (s/n) > " r < /dev/tty
   done
   [[ "$r" == [sS]* ]] && ES_ADOSE="s"
+fi
+
+# ── 0b. ¿Va a trabajar audio? ───────────────────────────────────────────────
+# Whisper, su modelo y Silero pesan ~1.3 GB y solo los usa quien transcribe o
+# edita grabaciones. Sin terminal para preguntar, no se instalan. Si ya estaban,
+# se dan por elegidos (no se quitan ni se preguntan otra vez).
+QUIERE_AUDIO="n"
+if tiene_transcripcion; then QUIERE_AUDIO="s"
+elif : < /dev/tty 2>/dev/null; then
+  gris "Transcribir audios (notas de voz, entrevistas) o editar grabaciones necesita"
+  gris "bajar ~1.3 GB más. Si no lo vas a hacer, se salta y termina antes."
+  r=""
+  while [[ "$r" != [sSnN]* ]]; do
+    read -r -p "  ¿Vas a transcribir audios o editar grabaciones? (s/n) > " r < /dev/tty
+  done
+  [[ "$r" == [sS]* ]] && QUIERE_AUDIO="s"
 fi
 
 # ── 1. Diagnóstico ──────────────────────────────────────────────────────────
@@ -164,7 +182,7 @@ if usar_macports; then
   :
 elif tiene_brew; then
   gris "Programas con Homebrew (puede tardar varios minutos la primera vez)..."
-  if instalar_formulas; then verde "poppler, qpdf, tesseract, ffmpeg, ImageMagick, whisper"
+  if instalar_formulas; then verde "poppler, qpdf, tesseract, ffmpeg, ImageMagick$(quiere_audio && echo ', whisper')"
   else rojo "No quedaron todos: $(brew_falta | tr '\n' ' ')"; fi
   gris "yt-dlp, pandoc, Node y exiftool, de la página oficial de cada uno..."
   herramientas_oficiales
@@ -180,13 +198,20 @@ fi
 tiene_python_docs || gris "Preparando Python con las librerías de documentos (unos minutos)..."
 if instalar_uv && instalar_python_docs; then persistir_python_docs; verde "Python con librerías de PDF, Word, Excel, PowerPoint, imágenes y OCR"
 else rojo "No se pudo preparar el Python con las librerías de documentos."; fi
-tiene_python_ia || gris "Instalando Apple Vision (OCR) y Silero (detección de voz); trae torch, ~700 MB..."
-if instalar_python_ia; then verde "Apple Vision (ocrmac) y Silero VAD"
-else rojo "No se pudieron instalar Apple Vision y Silero."; fi
+if instalar_vision; then verde "Apple Vision (OCR)"; else rojo "No se pudo instalar Apple Vision."; fi
+if quiere_audio; then
+tiene_silero || gris "Instalando Silero (detección de voz); trae torch, ~700 MB..."
+if instalar_silero; then verde "Silero VAD"
+else rojo "No se pudo instalar Silero."; fi
+fi
 usar_macports && herramientas_intel_final
 
+if quiere_audio; then
 tiene_modelo_whisper || gris "Bajando el modelo para transcribir audio (~550 MB)..."
 if instalar_modelo_whisper; then verde "Modelo de transcripción en $HERR_MODELO"; else rojo "No se pudo bajar el modelo de transcripción."; fi
+else
+gris "Transcripción y Silero: se saltan. Si después los necesitas, vuelve a correr el instalador y contesta «s»."
+fi
 
 
 paso "6/7  Configuración del equipo"
@@ -194,8 +219,7 @@ aplicar_config "$PWD" "$PERFIL" "$ES_ADOSE"
 verde "~/.claude listo (lo que había quedó respaldado en ~/.claude/respaldo-*)"
 
 paso "7/7  Plugins y conectores de Claude Code"
-gris "document-skills, productivity, enterprise-search, operations, human-resources,"
-gris "finance, data, marketing, pdf-viewer y watch (ver videos)"
+gris "document-skills (Word, Excel, PowerPoint, PDF), productivity y watch (ver videos)"
 if instalar_plugins; then verde "Plugins instalados y activos"
 else rojo "No quedaron: $(plugins_faltan | tr '\n' ' ')"; fi
 if instalar_fasttrack; then verde "FastTrack (búsqueda de literatura académica)"; else rojo "No se pudo agregar FastTrack."; fi

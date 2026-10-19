@@ -5,8 +5,9 @@
 #               node, yt-dlp y LibreOffice (algunos piden confirmar en una ventana de Windows)
 #   uv       -> un Python propio con las librerias de documentos (queda primero en el PATH)
 #   npm      -> docx y pptxgenjs (los usan los skills de Word y PowerPoint)
-#   Whisper  -> whisper.cpp oficial (GitHub) + modelo large-v3-turbo q5_0 (~550 MB)
-#   Claude   -> plugins oficiales: document-skills y los de oficina
+#   Whisper  -> whisper.cpp oficial (GitHub) + modelo large-v3-turbo q5_0 (~550 MB),
+#               junto con Silero, solo si la persona va a trabajar audio ($QuiereAudio)
+#   Claude   -> plugins: document-skills, productivity y watch (ver videos)
 #   Office   -> complementos de Claude en Word, Excel y PowerPoint (AppSource)
 #
 # Sin tildes a proposito: PowerShell 5 lee mal los .ps1 en UTF-8 sin BOM.
@@ -239,12 +240,11 @@ function Instalar-ModeloWhisper {
 # Instagram, TikTok o un archivo local. Se deja en modo local: nada sale de la
 # computadora sin pedirlo.
 $script:Marketplaces = @("anthropics/skills","anthropics/knowledge-work-plugins","bradautomates/claude-video")
+# Los otros de knowledge-work-plugins (enterprise-search, operations, human-resources,
+# finance, data, marketing, pdf-viewer) ya no se instalan: flujos de empresa en ingles
+# que el equipo no usa. A quien ya los tenga no se le quitan.
 $script:Plugins = @("document-skills@anthropic-agent-skills",
-  "productivity@knowledge-work-plugins","enterprise-search@knowledge-work-plugins",
-  "operations@knowledge-work-plugins","human-resources@knowledge-work-plugins",
-  "finance@knowledge-work-plugins","data@knowledge-work-plugins",
-  "marketing@knowledge-work-plugins","pdf-viewer@knowledge-work-plugins",
-  "watch@claude-video")
+  "productivity@knowledge-work-plugins","watch@claude-video")
 
 function Plugins-Faltan {
   $lista = (claude plugin list 2>&1 | Out-String)

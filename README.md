@@ -66,12 +66,12 @@ En Mac el doble clic en `Instalar en Mac.command` **no funciona si el archivo se
 | Google Chrome | Descarga de `dl.google.com`, verificada por firma de **Google** | winget `Google.Chrome`, o instalador oficial verificado por firma |
 | Herramientas (PDF, Office, imágenes, OCR, audio) | De la página oficial de cada proyecto, ya compilados y con su checksum o firma verificados: yt-dlp, pandoc, Node, exiftool y LibreOffice (sin contraseña, en `~/.local`). Por Homebrew solo lo que no tiene binario oficial para Mac: poppler, qpdf, tesseract + español, ffmpeg, ImageMagick y whisper-cpp. En Mac Intel (Homebrew ya no funciona ahí): MacPorts, los .pkg oficiales de pandoc y Node, y whisper.cpp compilado | winget: los mismos (whisper.cpp desde su GitHub oficial) |
 | Python de documentos | `uv` + Python 3.12 en `~/.local/share/claude-equipo/python` con pypdf, pdfplumber, pymupdf, pikepdf, reportlab, python-docx, openpyxl, pandas, python-pptx, pillow, pytesseract, markitdown… | Igual, en `%LOCALAPPDATA%\claude-equipo\python` |
-| Transcripción | Modelo whisper `large-v3-turbo` q5_0 (~550 MB) | Igual |
-| OCR y voz | En ese Python: `ocrmac` (OCR con Apple Vision, el del sistema) y `silero-vad` + soundfile (detecta voz; trae torch, ~700 MB) | Solo `silero-vad` (Apple Vision no existe en Windows) |
+| Transcripción (opcional) | Modelo whisper `large-v3-turbo` q5_0 (~550 MB). Solo si la persona contesta «s» a «¿Vas a transcribir audios o editar grabaciones?» | Igual |
+| OCR y voz | En ese Python: `ocrmac` (OCR con Apple Vision, el del sistema) y, solo si va a trabajar audio, `silero-vad` + soundfile (detecta voz; trae torch, ~700 MB) | Solo `silero-vad` (Apple Vision no existe en Windows) |
 | Skills de documentos | Plugin oficial `document-skills` de Anthropic en Claude Code | Igual |
 | Configuración | Copia `config/` a `~/.claude/` y encima el perfil, si lo hay | Igual, en `%USERPROFILE%\.claude\` |
 
-**3. Plugins y conectores de Claude Code**, solos: `document-skills` y los de oficina de Anthropic (`productivity`, `enterprise-search`, `operations`, `human-resources`, `finance`, `data`, `marketing`, `pdf-viewer`), `watch` para que Claude vea videos (YouTube, Instagram, TikTok o archivos; queda en modo local, sin subir nada), y el conector de FastTrack.
+**3. Plugins y conectores de Claude Code**, solos: `document-skills` (Word, Excel, PowerPoint y PDF), `productivity`, `watch` para que Claude vea videos (YouTube, Instagram, TikTok o archivos; queda en modo local, sin subir nada), y el conector de FastTrack.
 
 **4. Diez pasos guiados, todos opcionales.** Cada uno pregunta si se hace ahora (Enter = sí, `n` = saltar); nada obliga a entrar a claude.ai, instalar la extensión de Chrome, los complementos de Office, WhatsApp, Obsidian ni Claude Code. Lo que se salta se retoma volviendo a pegar la misma línea. Los que ya están hechos se detectan o se preguntan («¿Ya lo tienes?») y se saltan:
 
@@ -100,8 +100,8 @@ Se puede volver a correr las veces que haga falta: lo instalado se detecta y se 
 | Claude Desktop | Descarga de `downloads.claude.ai`, verificada por checksum y firma de **Anthropic PBC** | winget `Anthropic.Claude` |
 | Herramientas (PDF, Office, imágenes, OCR, audio) | De la página oficial de cada proyecto, ya compilados y con su checksum o firma verificados: yt-dlp, pandoc, Node, exiftool y LibreOffice (sin contraseña, en `~/.local`). Por Homebrew solo lo que no tiene binario oficial para Mac: poppler, qpdf, tesseract + español, ffmpeg, ImageMagick y whisper-cpp. En Mac Intel (Homebrew ya no funciona ahí): MacPorts, los .pkg oficiales de pandoc y Node, y whisper.cpp compilado | winget: los mismos (whisper.cpp desde su GitHub oficial) |
 | Python de documentos | `uv` + Python 3.12 en `~/.local/share/claude-equipo/python` con pypdf, pdfplumber, pymupdf, pikepdf, reportlab, python-docx, openpyxl, pandas, python-pptx, pillow, pytesseract, markitdown… | Igual, en `%LOCALAPPDATA%\claude-equipo\python` |
-| Transcripción | Modelo whisper `large-v3-turbo` q5_0 (~550 MB) | Igual |
-| OCR y voz | En ese Python: `ocrmac` (OCR con Apple Vision, el del sistema) y `silero-vad` + soundfile (detecta voz; trae torch, ~700 MB) | Solo `silero-vad` (Apple Vision no existe en Windows) |
+| Transcripción (opcional) | Modelo whisper `large-v3-turbo` q5_0 (~550 MB). Solo si la persona contesta «s» a «¿Vas a transcribir audios o editar grabaciones?» | Igual |
+| OCR y voz | En ese Python: `ocrmac` (OCR con Apple Vision, el del sistema) y, solo si va a trabajar audio, `silero-vad` + soundfile (detecta voz; trae torch, ~700 MB) | Solo `silero-vad` (Apple Vision no existe en Windows) |
 | Skills de documentos | Plugin oficial `document-skills` de Anthropic en Claude Code | Igual |
 | Configuración | Copia `config/` a `~/.claude/` y encima el perfil, si lo hay | Igual, en `%USERPROFILE%\.claude\` |
 | Sesión | Abre `claude` para que la persona entre con su cuenta (navegador) | Igual |

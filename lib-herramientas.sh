@@ -2,21 +2,28 @@
 # Herramientas para que Claude pueda trabajar con PDF, Word, Excel, PowerPoint,
 # imágenes, OCR y audio en macOS. Lo carga "Instalar en Mac.command".
 #
-#   Homebrew  → poppler, qpdf, tesseract (+ español), ffmpeg, imagemagick y
-#               whisper-cpp (no tienen un binario oficial para Mac)
+#   Homebrew  → poppler, qpdf, tesseract (+ español), ffmpeg, imagemagick y, si la
+#               persona va a trabajar audio, whisper-cpp (no tienen binario oficial)
 #   Oficiales → yt-dlp, pandoc, Node, exiftool y LibreOffice, bajados ya compilados
 #               de la página de cada proyecto (ver lib-oficiales.sh): menos
 #               descargas que por Homebrew y la versión del autor
 #   uv        → un Python propio con las librerías de documentos (queda primero en el PATH)
-#   uv        → además, en ese mismo Python: ocrmac (OCR con Apple Vision) y
-#               silero-vad (detecta dónde hay voz en un audio; trae torch, ~700 MB)
+#   uv        → además, en ese mismo Python: ocrmac (OCR con Apple Vision, liviano)
+#               y, solo si va a trabajar audio, silero-vad (detecta dónde hay voz;
+#               trae torch, ~700 MB)
 #   npm       → docx y pptxgenjs (los usan los skills de Word y PowerPoint)
-#   Whisper   → modelo large-v3-turbo (q5_0, ~550 MB) para transcribir en español
-#   Claude    → plugins oficiales: document-skills y los de oficina (productivity,
-#               enterprise-search, operations, human-resources, finance, data,
-#               marketing, pdf-viewer) y watch (ver videos: fotogramas + transcripción)
+#   Whisper   → modelo large-v3-turbo (q5_0, ~550 MB) para transcribir en español,
+#               solo si va a trabajar audio
+#   Claude    → plugins: document-skills, productivity y watch (ver videos)
+#
+# Lo de audio (whisper, su modelo y Silero) pesa ~1.3 GB y casi nadie lo usa: va
+# solo si la persona contesta que sí a «¿Vas a transcribir audios o editar
+# grabaciones?» (QUIERE_AUDIO, lo fija "Instalar en Mac.command").
 #
 # Homebrew es lo único que pide la contraseña de la Mac (una vez).
+
+QUIERE_AUDIO="${QUIERE_AUDIO:-n}"
+quiere_audio() { [[ "$QUIERE_AUDIO" == "s" ]]; }
 
 HERR_DIR="$HOME/.local/share/claude-equipo"
 HERR_PY="$HERR_DIR/python"
@@ -27,15 +34,17 @@ HERR_MODELO_BYTES=574041195
 # fórmula:programa — se instala la fórmula solo si el programa no está ya (por
 # ejemplo, pandoc o node instalados por otra vía).
 # pandoc, node, exiftool y yt-dlp ya no van por aquí: se bajan de su fuente oficial.
+# whisper-cpp se agrega solo si la persona va a trabajar audio (ver brew_falta).
 BREW_FORMULAS=(poppler:pdftotext qpdf:qpdf tesseract:tesseract ffmpeg:ffmpeg
-               imagemagick:magick whisper-cpp:whisper-cli)
+               imagemagick:magick)
 PY_LIBS=(pypdf pdfplumber pymupdf pikepdf reportlab pdf2image img2pdf pytesseract
          python-docx openpyxl xlsxwriter pandas python-pptx pillow matplotlib defusedxml
          "markitdown[all]" qrcode)
 # Apple Vision y Silero: aparte de PY_LIBS porque torch pesa y tarda; si falla,
 # el Python de documentos queda igual. Sin torchaudio: su torchcodec choca con
 # torch nuevo; el audio se lee con soundfile.
-PY_IA_LIBS=(ocrmac silero-vad soundfile)
+PY_VISION_LIBS=(ocrmac)
+PY_VOZ_LIBS=(silero-vad soundfile)
 NPM_LIBS=(docx pptxgenjs)
 
 # ------------------------------------------------------------------ Homebrew
@@ -68,6 +77,8 @@ brew_falta() {
   local f
   ruta_extendida
   for f in "${BREW_FORMULAS[@]}"; do tiene "${f#*:}" || echo "${f%%:*}"; done
+  quiere_audio && ! tiene whisper-cli && echo whisper-cpp
+  return 0
 }
 
 instalar_formulas() {
@@ -128,16 +139,28 @@ instalar_python_docs() {
   tiene_python_docs
 }
 
-tiene_python_ia() {
+tiene_vision() {
   [[ -x "$HERR_PY/bin/python" ]] || return 1
-  "$HERR_PY/bin/python" -c "import ocrmac, silero_vad, soundfile, torch" 2>/dev/null
+  "$HERR_PY/bin/python" -c "import ocrmac" 2>/dev/null
 }
 
-instalar_python_ia() {
-  tiene_python_ia && return 0
+instalar_vision() {
+  tiene_vision && return 0
   [[ -x "$HERR_PY/bin/python" ]] || return 1
-  uv pip install --quiet --python "$HERR_PY/bin/python" "${PY_IA_LIBS[@]}" >/dev/null 2>&1
-  tiene_python_ia
+  uv pip install --quiet --python "$HERR_PY/bin/python" "${PY_VISION_LIBS[@]}" >/dev/null 2>&1
+  tiene_vision
+}
+
+tiene_silero() {
+  [[ -x "$HERR_PY/bin/python" ]] || return 1
+  "$HERR_PY/bin/python" -c "import silero_vad, soundfile, torch" 2>/dev/null
+}
+
+instalar_silero() {
+  tiene_silero && return 0
+  [[ -x "$HERR_PY/bin/python" ]] || return 1
+  uv pip install --quiet --python "$HERR_PY/bin/python" "${PY_VOZ_LIBS[@]}" >/dev/null 2>&1
+  tiene_silero
 }
 
 # Ese Python queda primero en el PATH, así `python3` y `pip` ya traen las librerías.
@@ -186,12 +209,12 @@ instalar_modelo_whisper() {
 # watch (bradautomates/claude-video, MIT): Claude «ve» un video de YouTube,
 # Instagram, TikTok o un archivo local — fotogramas con ffmpeg, subtítulos con
 # yt-dlp. Se deja en modo local: nada sale de la computadora sin pedirlo.
+# Los otros de knowledge-work-plugins (enterprise-search, operations,
+# human-resources, finance, data, marketing, pdf-viewer) ya no se instalan: son
+# flujos de empresa en inglés que el equipo no usa y solo llenan Claude de
+# opciones. A quien ya los tenga no se le quitan.
 MARKETPLACES=(anthropics/skills anthropics/knowledge-work-plugins bradautomates/claude-video)
-PLUGINS=(document-skills@anthropic-agent-skills
-         productivity@knowledge-work-plugins enterprise-search@knowledge-work-plugins
-         operations@knowledge-work-plugins human-resources@knowledge-work-plugins
-         finance@knowledge-work-plugins data@knowledge-work-plugins
-         marketing@knowledge-work-plugins pdf-viewer@knowledge-work-plugins
+PLUGINS=(document-skills@anthropic-agent-skills productivity@knowledge-work-plugins
          watch@claude-video)
 
 tiene_plugins() {
