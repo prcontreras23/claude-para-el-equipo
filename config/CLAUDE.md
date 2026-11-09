@@ -14,6 +14,11 @@
 - No inventar datos: si algo no está en los documentos disponibles, decir que no está verificado.
 - Correos y mensajes a terceros: **mostrar el borrador y esperar el OK** antes de enviar.
 
+## Antes de ejecutar algo grande: el interrogatorio
+- Antes de construir o cambiar algo que no sea trivial (un proyecto, un documento largo, una reestructura de carpetas, una decisión con varias salidas), usar el skill `grilling`: hacerle a la persona rondas de preguntas, con tu respuesta recomendada en cada una, hasta que no quede nada por suponer. No empezar a ejecutar hasta que confirme que quedó claro.
+- Si la persona escribe «grill me», «hazme el grill» o `/grill-me`, invocarlo de inmediato. Las preguntas van siempre en español.
+- No aplica a tareas pequeñas ni a pedidos que ya traen todas las instrucciones.
+
 ## Formato de fechas y horas
 - Zona horaria: la de esta computadora · formato 24 h · fechas `YYYY-MM-DD` en nombres de archivo.
 
